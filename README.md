@@ -32,9 +32,9 @@ PromptDev is a modern prompt evaluation framework that provides comprehensive te
 
 ### Installation
 
-#### From PyPI (when available)
+#### From PyPI (alpha version)
 ```bash
-pip install promptdev
+pip install promptdev --pre
 ```
 
 #### From Source
@@ -257,18 +257,17 @@ uv run mypy promptdev/
 - [x] Comprehensive assertion types (JSON schema, Python, LLM-based)
 - [x] File-based caching system with TTL support
 - [x] Rich console reporting with failure analysis
-- [ ] Simple file disk cache
+- [x] Simple file disk cache
 - [ ] Better integration with PydanticAI, do not reinvent the wheel
+- [ ] Concurrent execution using PydanticAI natively, for faster large-scale evaluations
 - [ ] Testing
-- [ ] Concurrent execution for faster large-scale evaluations
 - [ ] Code cleanup
-- [ ] Testing pensero promptfoo files
+- [ ] Testing promptfoo files
 - [ ] Add support to run multiple test_cases
 - [ ] CI/CD integration helpers with change detection
 - [ ] Red team security testing capabilities
 - [ ] Turso persistence for evaluation history and analytics
 - [ ] Performance benchmarking and regression detection
-- [ ] Distributed evaluation across multiple machines
 
 ## Contributing
 

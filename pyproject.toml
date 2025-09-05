@@ -4,6 +4,19 @@ version = "0.0.1"
 description = "Python-native prompt evaluation tool using PydanticAI"
 readme = "README.md"
 requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+]
 dependencies = [
     "pydantic-ai==1.0.0b1",
     "pydantic-evals",
@@ -29,9 +42,9 @@ logfire = ["logfire>=0.1.0"]
 [project.scripts]
 promptdev = "promptdev.cli:cli"
 
-[build-system] # TODO use uv build instead
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 100
@@ -89,6 +102,10 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.uv.build-backend]
+module-name = "promptdev"
+module-root = ""
 
 [tool.logfire]
 ignore_no_config = true
