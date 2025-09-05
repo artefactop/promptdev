@@ -48,7 +48,7 @@ class TestPromptDevAgent:
 
         assert agent.prompt_path == sample_prompt_file
         assert agent.provider_config == provider_config
-        assert agent.output_type == str
+        assert isinstance(agent.output_type, str)
         assert agent.system_prompt is not None
         assert agent.user_template is not None
 
@@ -131,13 +131,11 @@ class TestPromptDevAgent:
             "task_type": "data processing",
             # missing user_input and output_format
         }
+        # This should fail during template formatting
+        with pytest.raises(ValueError, match="Missing variable"), patch("pydantic_ai.Agent"):
+            import asyncio
 
-        with pytest.raises(ValueError, match="Missing variable"):
-            # This should fail during template formatting
-            with patch("pydantic_ai.Agent"):
-                import asyncio
-
-                asyncio.run(agent.run_test(incomplete_vars))
+            asyncio.run(agent.run_test(incomplete_vars))
 
     def test_model_creation_openai(self, sample_prompt_file):
         """Test OpenAI model creation."""
@@ -175,15 +173,15 @@ class TestPromptDevAgent:
         # Set environment variable to avoid OpenAI API key error
         import os
 
-        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
-            with patch("pydantic_ai.models.test.TestModel"):
-                agent = PromptDevAgent(
-                    prompt_path=sample_prompt_file, provider_config=provider_config
-                )
+        with (
+            patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}),
+            patch("pydantic_ai.models.test.TestModel"),
+        ):
+            agent = PromptDevAgent(prompt_path=sample_prompt_file, provider_config=provider_config)
 
-                # The test model creation might be handled differently by PydanticAI
-                # Just verify no errors during agent creation
-                assert agent is not None
+            # The test model creation might be handled differently by PydanticAI
+            # Just verify no errors during agent creation
+            assert agent is not None
 
     def test_run_settings_extraction(self, sample_prompt_file, provider_config):
         """Test extraction of model settings for run method."""

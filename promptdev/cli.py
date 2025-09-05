@@ -13,6 +13,8 @@ from rich.rule import Rule
 from rich.table import Table
 from rich.tree import Tree
 
+from promptdev.evaluation.results import ProviderResult
+
 from .cache import clear_cache, get_cache
 from .config.loader import load_config
 from .evaluation.runner import EvaluationRunner
@@ -234,7 +236,7 @@ def eval(
             console.print_exception()
         else:
             console.print("[dim]Use --verbose for full error details[/dim]")
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @cli.command()
@@ -279,7 +281,7 @@ def validate(config_file: Path):
 
     except Exception as e:
         console.print(f"[red]✗ Configuration validation failed: {e}[/red]")
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @cli.command()
@@ -547,14 +549,15 @@ def _print_provider_comparison(results):
 
             # Highlight best performer(s)
             for j, provider_result in enumerate(results.provider_results):
-                if provider_result.provider_id in best_providers and best_score > 0:
-                    # Make the best score bold and green
-                    if i < len(provider_result.test_results):
-                        test_result = provider_result.test_results[i]
-                        status = "✔" if test_result.passed else "✗"
-                        row_data[j + 2] = (
-                            f"[bold green]{status} {test_result.score:.2f}[/bold green]"
-                        )
+                # Make the best score bold and green
+                if (
+                    provider_result.provider_id in best_providers
+                    and best_score > 0
+                    and i < len(provider_result.test_results)
+                ):
+                    test_result = provider_result.test_results[i]
+                    status = "✔" if test_result.passed else "✗"
+                    row_data[j + 2] = f"[bold green]{status} {test_result.score:.2f}[/bold green]"
 
             table.add_row(*row_data)
 

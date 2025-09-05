@@ -61,7 +61,14 @@ class JSONSchemaValidator(Evaluator[str, Any]):
             for field, field_schema in properties.items():
                 if field in data:
                     expected_type = field_schema.get("type")
-                    if expected_type == "string" and not isinstance(data[field], str) or expected_type == "boolean" and not isinstance(data[field], bool) or expected_type == "number" and not isinstance(data[field], int | float):
+                    if (
+                        expected_type == "string"
+                        and not isinstance(data[field], str)
+                        or expected_type == "boolean"
+                        and not isinstance(data[field], bool)
+                        or expected_type == "number"
+                        and not isinstance(data[field], int | float)
+                    ):
                         return 0.0
 
             return 1.0
@@ -114,7 +121,7 @@ class PythonAssertionEvaluator(Evaluator[str, Any]):
 
             spec.loader.exec_module(module)
         except Exception as e:
-            raise ImportError(f"Failed to load assertion module from {assert_path}: {e}")
+            raise ImportError(f"Failed to load assertion module from {assert_path}: {e}") from e
 
         if not hasattr(module, "get_assert"):
             available_functions = [name for name in dir(module) if not name.startswith("_")]
@@ -263,9 +270,7 @@ class ContainsJSONEvaluator(Evaluator[str, Any]):
                         elif expected_type == "boolean" and not isinstance(data[field], bool):
                             self.last_failure_reason = f"Field '{field}' must be a boolean, got {type(data[field]).__name__}"
                             return 0.0
-                        elif expected_type == "number" and not isinstance(
-                            data[field], int | float
-                        ):
+                        elif expected_type == "number" and not isinstance(data[field], int | float):
                             self.last_failure_reason = f"Field '{field}' must be a number, got {type(data[field]).__name__}"
                             return 0.0
                         elif expected_type == "integer" and not isinstance(data[field], int):
@@ -503,7 +508,7 @@ def create_pydantic_evaluator(
                 else:
                     raise FileNotFoundError(f"Schema file not found: {schema_path}")
             except Exception as e:
-                raise ValueError(f"Failed to load schema from file: {e}")
+                raise ValueError(f"Failed to load schema from file: {e}") from e
         else:
             raise ValueError(
                 f"Contains-json evaluator requires dict or file path, got: {type(evaluator_value)}"

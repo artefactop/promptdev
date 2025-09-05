@@ -19,9 +19,7 @@ class TestResult:
     variables: dict[str, Any]
     error: str | None = None
     execution_time_ms: float | None = None
-    assertions: list[dict[str, Any]] | None = (
-        None  # List of assertion configurations being checked
-    )
+    assertions: list[dict[str, Any]] | None = None  # List of assertion configurations being checked
     failed_assertions: list[dict[str, Any]] | None = (
         None  # List of assertions that failed with failure reasons
     )

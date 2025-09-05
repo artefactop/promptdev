@@ -129,7 +129,7 @@ class PromptDevDataset:
                     test_cases.append(test_case)
 
                 except json.JSONDecodeError as e:
-                    raise ValueError(f"Invalid JSON on line {line_num} of {file_path}: {e}")
+                    raise ValueError(f"Invalid JSON on line {line_num} of {file_path}: {e}") from e
 
         return cls(test_cases)
 

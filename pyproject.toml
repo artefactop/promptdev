@@ -1,6 +1,6 @@
 [project]
 name = "promptdev"
-version = "0.1.0"
+version = "0.0.1"
 description = "Python-native prompt evaluation tool using PydanticAI"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -16,7 +16,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0", "pytest-asyncio>=0.21.0", "ruff>=0.1.0"]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "safety>=3.0.0",
+    "bandit[toml]>=1.7.0",
+]
 logfire = ["logfire>=0.1.0"]
 
 [project.scripts]
@@ -59,6 +66,29 @@ line-ending = "auto"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = ["--strict-markers", "--strict-config", "--tb=short"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["promptdev"]
+omit = ["tests/*", "examples/*", "promptdev/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
 
 [tool.logfire]
 ignore_no_config = true

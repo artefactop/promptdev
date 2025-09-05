@@ -112,7 +112,7 @@ class EvaluationRunner:
                 provider_config = get_provider_config(provider_override, self.config.providers)
                 providers_to_test = [provider_config]
             except ValueError as e:
-                raise ValueError(f"Provider override failed: {e}")
+                raise ValueError(f"Provider override failed: {e}") from e
 
         if self.verbose:
             console.print(
@@ -614,13 +614,16 @@ class EvaluationRunner:
                             )
 
                 # Check if the report itself indicates failures
-                if hasattr(report, "summary") and hasattr(report.summary, "evaluator_failures"):
-                    if report.summary.evaluator_failures:
-                        has_failures = True
-                        if self.verbose:
-                            console.print(
-                                f"[red]Report shows evaluator failures: {report.summary.evaluator_failures}[/red]"
-                            )
+                if (
+                    hasattr(report, "summary")
+                    and hasattr(report.summary, "evaluator_failures")
+                    and report.summary.evaluator_failures
+                ):
+                    has_failures = True
+                    if self.verbose:
+                        console.print(
+                            f"[red]Report shows evaluator failures: {report.summary.evaluator_failures}[/red]"
+                        )
 
                 # Store failed assertion details for TestResult creation (BEFORE early return)
                 self._last_failed_assertions = (

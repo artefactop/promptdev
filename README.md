@@ -1,8 +1,11 @@
 # PromptDev
 
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=for-the-badge)](https://github.com/astral-sh/ruff)
+[![CI](https://github.com/artefactop/promptdev/workflows/CI/badge.svg)](https://github.com/artefactop/promptdev/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/artefactop/promptdev/branch/main/graph/badge.svg)](https://codecov.io/gh/artefactop/promptdev)
+[![Security](https://github.com/artefactop/promptdev/workflows/Security%20&%20Dependencies/badge.svg)](https://github.com/artefactop/promptdev/actions/workflows/security.yml)
 
 **Python-native prompt evaluation tool using PydanticAI**
 

@@ -28,11 +28,11 @@ def load_config(config_path: Path) -> PromptDevConfig:
                     f"Supported formats: .yaml, .yml, .json"
                 )
     except yaml.YAMLError as e:
-        raise ValueError(f"Invalid YAML syntax in config file: {config_path}\nError: {e}")
+        raise ValueError(f"Invalid YAML syntax in config file: {config_path}\nError: {e}") from e
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON syntax in config file: {config_path}\nError: {e}")
+        raise ValueError(f"Invalid JSON syntax in config file: {config_path}\nError: {e}") from e
     except Exception as e:
-        raise ValueError(f"Failed to read config file: {config_path}\nError: {e}")
+        raise ValueError(f"Failed to read config file: {config_path}\nError: {e}") from e
 
     if data is None:
         raise ValueError(f"Config file is empty or contains only null values: {config_path}")
@@ -54,17 +54,17 @@ def load_config(config_path: Path) -> PromptDevConfig:
                 f"Missing required field in config file: {config_path}\n"
                 f"Error: {error_msg}\n"
                 f"Hint: Make sure you have 'prompts', 'providers', and 'tests' sections defined."
-            )
+            ) from e
         elif "ValidationError" in str(type(e)):
             raise ValueError(
                 f"Configuration validation failed for: {config_path}\n"
                 f"Error: {error_msg}\n"
                 f"Hint: Check the format of your configuration file against the documentation."
-            )
+            ) from e
         else:
             raise ValueError(
                 f"Failed to load configuration from: {config_path}\nError: {error_msg}"
-            )
+            ) from e
 
 
 def _resolve_relative_paths(data: dict[str, Any], base_path: Path) -> dict[str, Any]:
