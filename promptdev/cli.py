@@ -43,14 +43,12 @@ def _create_wrapped_panel(
     available_width = max_width or max(50, terminal_width - 10)  # Leave margin for indentation
 
     # Create the panel with Rich's intelligent fitting
-    # Panel.fit() automatically sizes to content but respects width constraints
+    # For output content, use a reasonable minimum width to prevent character-by-character wrapping
     panel = Panel(
         content,
         title=title,
         border_style=border_style,
-        width=min(available_width, len(content.split("\n")[0]) + 4)
-        if len(content) < 100
-        else available_width,
+        width=available_width,  # Always use full available width for proper text wrapping
         expand=False,  # Don't expand to full terminal width
         padding=(0, 1),  # Add some internal padding
     )

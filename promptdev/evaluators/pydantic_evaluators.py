@@ -389,18 +389,22 @@ class FailureEvaluator(Evaluator[str, Any]):
 
 
 def create_pydantic_evaluator(
-    assertion_config: AssertionConfig, config: PromptDevConfig, verbose: bool = False
+    assertion_config: AssertionConfig | dict, config: PromptDevConfig, verbose: bool = False
 ) -> Evaluator:
     """Factory function to create pydantic_evals evaluators.
 
     Args:
-        assertion_config: Assertion configuration
+        assertion_config: Assertion configuration (AssertionConfig object or dict)
         config: Full PromptDev configuration (for schema resolution)
         verbose: Enable verbose output
 
     Returns:
         Appropriate pydantic_evals evaluator instance
     """
+    # Convert dict to AssertionConfig if needed
+    if isinstance(assertion_config, dict):
+        assertion_config = AssertionConfig(**assertion_config)
+
     evaluator_type = assertion_config.type
     evaluator_value = assertion_config.value
 
@@ -451,17 +455,18 @@ def create_pydantic_evaluator(
             evaluator_type = resolved_assertion.type
             evaluator_value = resolved_assertion.value
 
+            # TODO: maybe we can resolve this easier using yaml reader?
             # Resolve schema references within template value
             if isinstance(evaluator_value, dict) and "$ref" in evaluator_value:
                 schema_ref = evaluator_value["$ref"]
 
                 # Handle different schema reference formats
-                if schema_ref.startswith("#/schemas/"):
+                if schema_ref and schema_ref.startswith("#/schemas/"):
                     # Standard schema reference format
                     schema_name = schema_ref[len("#/schemas/") :]
                     if config.schemas and schema_name in config.schemas:
                         evaluator_value = config.schemas[schema_name]
-                elif schema_ref.startswith("#/"):
+                elif schema_ref and schema_ref.startswith("#/"):
                     # Direct root-level schema reference (promptfoo style)
                     schema_name = schema_ref[len("#/") :]
                     # Check if the schema exists as a top-level attribute in config
@@ -734,7 +739,7 @@ class PromptDevDataset:
         # Check for template reference (e.g., $ref: '#/assertionTemplates/assertExpected')
         if "ref" in assertion_dict:
             ref = assertion_dict["ref"]
-            if ref.startswith("#/assertionTemplates/"):
+            if ref and ref.startswith("#/assertionTemplates/"):
                 return ref[len("#/assertionTemplates/") :]
 
         # Check for metric name

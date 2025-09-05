@@ -3,13 +3,14 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=for-the-badge)](https://github.com/astral-sh/ruff)
-[![CI](https://github.com/artefactop/promptdev/workflows/CI/badge.svg)](https://github.com/artefactop/promptdev/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/artefactop/promptdev/branch/main/graph/badge.svg)](https://codecov.io/gh/artefactop/promptdev)
-[![Security](https://github.com/artefactop/promptdev/workflows/Security%20&%20Dependencies/badge.svg)](https://github.com/artefactop/promptdev/actions/workflows/security.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/artefactop/promptdev/ci.yml?style=for-the-badge)](https://github.com/artefactop/promptdev/actions/workflows/ci.yml)
+[![codecov](https://img.shields.io/codecov/c/github/artefactop/promptdev?style=for-the-badge)](https://codecov.io/gh/artefactop/promptdev)
+[![Security](https://img.shields.io/github/actions/workflow/status/artefactop/promptdev/security.yml?style=for-the-badge)](https://github.com/artefactop/promptdev/actions/workflows/security.yml)
 
-**Python-native prompt evaluation tool using PydanticAI**
 
-PromptDev is a modern prompt evaluation framework that provides comprehensive testing for AI agents across multiple providers. Built on [PydanticAI](https://ai.pydantic.dev/), it combines type safety with powerful evaluation capabilities.
+`promptdev` is a prompt evaluation framework that provides comprehensive testing for AI agents across multiple providers.
+
+![PromptDev Demo](https://github.com/artefactop/promptdev/raw/main/docs/demo.gif)
 
 > [!WARNING]
 >
@@ -21,8 +22,8 @@ PromptDev is a modern prompt evaluation framework that provides comprehensive te
 ## Features
 
 - 🔒 **Type Safe** - Full Pydantic validation for inputs, outputs, and configurations  
-- 🤖 **PydanticAI Integration** - Native support for PydanticAI agents and [evaluation framework](https://ai.pydantic.dev/evals/)
-- 📊 **Multi-Provider Testing** - Test across OpenAI, Together.ai, Ollama, Bedrock, and more
+- 🤖 **PydanticAI Integration** - Native support for PydanticAI agents (in progress) and [evaluation framework](https://ai.pydantic.dev/evals/)
+- 📊 **Multi-Provider Testing** - Test across OpenAI, Together.ai, Ollama, Bedrock, and [more](https://ai.pydantic.dev/models/overview/)
 - ⚡ **Performance Optimized** - File-based caching with TTL for faster repeated evaluations
 - 📈 **Rich Reporting** - Beautiful console output with detailed failure analysis and provider comparisons
 - 🧪 **Promptfoo Compatible** - Works with (some) existing promptfoo YAML configs and datasets
@@ -260,6 +261,7 @@ uv run mypy promptdev/
 - [x] Simple file disk cache
 - [ ] Better integration with PydanticAI, do not reinvent the wheel
 - [ ] Concurrent execution using PydanticAI natively, for faster large-scale evaluations
+- [ ] Native support for PydanticAI agents
 - [ ] Testing
 - [ ] Code cleanup
 - [ ] Testing promptfoo files
