@@ -5,7 +5,7 @@ from .results import EvaluationResults
 from .runner import EvaluationRunner
 
 __all__ = [
+    "EvaluationResults",
     "EvaluationRunner",
     "PromptDevDataset",
-    "EvaluationResults",
 ]

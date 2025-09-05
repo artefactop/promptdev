@@ -1,0 +1,5 @@
+- role: system
+  content: "You are a helpful assistant that responds in JSON format. An entry with the key 'sentiment' and its value: positive, negative or neutral."
+
+- role: user
+  content: "Extract the sentiment from: {text}"

@@ -46,7 +46,7 @@ def normalize_model_name(model: str) -> str:
         parts = model.split(":", 2)
         if len(parts) >= 3:
             return f"together:{parts[2]}"
-        elif len(parts) == 2:
+        if len(parts) == 2:
             return f"together:{parts[1]}"
 
     # Handle ollama chat format

@@ -37,7 +37,7 @@ class PromptDevDataset:
             }
             return cls([test_case])
 
-        elif isinstance(config, DatasetConfig):
+        if isinstance(config, DatasetConfig):
             if config.file:
                 # Load from JSONL file
                 file_path = config.file
@@ -48,7 +48,7 @@ class PromptDevDataset:
                     else:
                         file_path = Path(file_path)
                 return cls._load_from_jsonl(file_path)
-            elif config.inline:
+            if config.inline:
                 # Inline test cases
                 test_cases = []
                 for i, case_data in enumerate(config.inline):
@@ -71,7 +71,7 @@ class PromptDevDataset:
                     }
                     test_cases.append(test_case)
                 return cls(test_cases)
-            elif config.vars:
+            if config.vars:
                 # Single vars dictionary
                 test_case = {"vars": config.vars, "name": "vars_test", "assertions": []}
                 return cls([test_case])

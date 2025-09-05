@@ -55,16 +55,15 @@ def load_config(config_path: Path) -> PromptDevConfig:
                 f"Error: {error_msg}\n"
                 f"Hint: Make sure you have 'prompts', 'providers', and 'tests' sections defined."
             ) from e
-        elif "ValidationError" in str(type(e)):
+        if "ValidationError" in str(type(e)):
             raise ValueError(
                 f"Configuration validation failed for: {config_path}\n"
                 f"Error: {error_msg}\n"
                 f"Hint: Check the format of your configuration file against the documentation."
             ) from e
-        else:
-            raise ValueError(
-                f"Failed to load configuration from: {config_path}\nError: {error_msg}"
-            ) from e
+        raise ValueError(
+            f"Failed to load configuration from: {config_path}\nError: {error_msg}"
+        ) from e
 
 
 def _resolve_relative_paths(data: dict[str, Any], base_path: Path) -> dict[str, Any]:
@@ -123,10 +122,9 @@ def _resolve_relative_paths(data: dict[str, Any], base_path: Path) -> dict[str, 
             else:
                 result[key] = _resolve_relative_paths(value, base_path)
         return result
-    elif isinstance(data, list):
+    if isinstance(data, list):
         return [_resolve_relative_paths(item, base_path) for item in data]
-    else:
-        return data
+    return data
 
 
 def _convert_promptfoo_assertions(data: dict[str, Any]) -> dict[str, Any]:
@@ -176,7 +174,6 @@ def _convert_promptfoo_assertions(data: dict[str, Any]) -> dict[str, Any]:
                     else value
                 )
         return result
-    elif isinstance(data, list):
+    if isinstance(data, list):
         return [_convert_promptfoo_assertions(item) for item in data]
-    else:
-        return data
+    return data

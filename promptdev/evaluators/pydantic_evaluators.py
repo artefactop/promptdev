@@ -62,12 +62,12 @@ class JSONSchemaValidator(Evaluator[str, Any]):
                 if field in data:
                     expected_type = field_schema.get("type")
                     if (
-                        expected_type == "string"
-                        and not isinstance(data[field], str)
-                        or expected_type == "boolean"
-                        and not isinstance(data[field], bool)
-                        or expected_type == "number"
-                        and not isinstance(data[field], int | float)
+                        (expected_type == "string"
+                        and not isinstance(data[field], str))
+                        or (expected_type == "boolean"
+                        and not isinstance(data[field], bool))
+                        or (expected_type == "number"
+                        and not isinstance(data[field], int | float))
                     ):
                         return 0.0
 
@@ -171,28 +171,27 @@ class PythonAssertionEvaluator(Evaluator[str, Any]):
                     self.last_failure_reason = None
 
                 return float(score)
-            elif isinstance(result, bool):
+            if isinstance(result, bool):
                 # Clear stored data for non-dict results
                 self.last_detailed_results = None
                 self.last_failure_reason = "Boolean assertion failed" if not result else None
                 return 1.0 if result else 0.0
-            elif isinstance(result, int | float):
+            if isinstance(result, int | float):
                 # Clear stored data for non-dict results
                 self.last_detailed_results = None
                 self.last_failure_reason = (
                     "Numeric assertion failed" if float(result) < 1.0 else None
                 )
                 return float(result)
-            else:
-                # Clear stored data and set generic failure reason
-                self.last_detailed_results = None
-                self.last_failure_reason = "Invalid assertion return type"
-                return 0.0
+            # Clear stored data and set generic failure reason
+            self.last_detailed_results = None
+            self.last_failure_reason = "Invalid assertion return type"
+            return 0.0
 
         except Exception as e:
             # Don't print error here - let it be collected for summary reporting
             self.last_detailed_results = None
-            self.last_failure_reason = f"Assertion execution error: {str(e)}"
+            self.last_failure_reason = f"Assertion execution error: {e!s}"
             return 0.0
 
 
@@ -255,7 +254,7 @@ class ContainsJSONEvaluator(Evaluator[str, Any]):
                 if field not in data:
                     self.last_failure_reason = f"Required field '{field}' is missing"
                     return 0.0
-                elif data[field] is None:
+                if data[field] is None:
                     self.last_failure_reason = f"Required field '{field}' cannot be null"
                     return 0.0
 
@@ -267,19 +266,19 @@ class ContainsJSONEvaluator(Evaluator[str, Any]):
                         if expected_type == "string" and not isinstance(data[field], str):
                             self.last_failure_reason = f"Field '{field}' must be a string, got {type(data[field]).__name__}"
                             return 0.0
-                        elif expected_type == "boolean" and not isinstance(data[field], bool):
+                        if expected_type == "boolean" and not isinstance(data[field], bool):
                             self.last_failure_reason = f"Field '{field}' must be a boolean, got {type(data[field]).__name__}"
                             return 0.0
-                        elif expected_type == "number" and not isinstance(data[field], int | float):
+                        if expected_type == "number" and not isinstance(data[field], int | float):
                             self.last_failure_reason = f"Field '{field}' must be a number, got {type(data[field]).__name__}"
                             return 0.0
-                        elif expected_type == "integer" and not isinstance(data[field], int):
+                        if expected_type == "integer" and not isinstance(data[field], int):
                             self.last_failure_reason = f"Field '{field}' must be an integer, got {type(data[field]).__name__}"
                             return 0.0
-                        elif expected_type == "array" and not isinstance(data[field], list):
+                        if expected_type == "array" and not isinstance(data[field], list):
                             self.last_failure_reason = f"Field '{field}' must be an array, got {type(data[field]).__name__}"
                             return 0.0
-                        elif expected_type == "object" and not isinstance(data[field], dict):
+                        if expected_type == "object" and not isinstance(data[field], dict):
                             self.last_failure_reason = f"Field '{field}' must be an object, got {type(data[field]).__name__}"
                             return 0.0
 
@@ -287,10 +286,10 @@ class ContainsJSONEvaluator(Evaluator[str, Any]):
             return 1.0
 
         except json.JSONDecodeError as e:
-            self.last_failure_reason = f"Invalid JSON: {str(e)}"
+            self.last_failure_reason = f"Invalid JSON: {e!s}"
             return 0.0
         except Exception as e:
-            self.last_failure_reason = f"Schema validation error: {str(e)}"
+            self.last_failure_reason = f"Schema validation error: {e!s}"
             return 0.0
 
 
@@ -491,16 +490,15 @@ def create_pydantic_evaluator(
     if evaluator_type == "json_schema":
         if isinstance(evaluator_value, dict):
             return JSONSchemaValidator(schema=evaluator_value)
-        else:
-            raise ValueError(
-                f"JSON schema evaluator requires dict value, got: {type(evaluator_value)}"
-            )
+        raise ValueError(
+            f"JSON schema evaluator requires dict value, got: {type(evaluator_value)}"
+        )
 
-    elif evaluator_type == "contains-json":
+    if evaluator_type == "contains-json":
         # Promptfoo's contains-json evaluator
         if isinstance(evaluator_value, dict):
             return ContainsJSONEvaluator(schema=evaluator_value)
-        elif isinstance(evaluator_value, str):
+        if isinstance(evaluator_value, str):
             # Handle file reference to schema
             try:
                 from pathlib import Path
@@ -510,8 +508,7 @@ def create_pydantic_evaluator(
                     with open(schema_path) as f:
                         schema = json.load(f)
                     return ContainsJSONEvaluator(schema=schema)
-                else:
-                    raise FileNotFoundError(f"Schema file not found: {schema_path}")
+                raise FileNotFoundError(f"Schema file not found: {schema_path}")
             except Exception as e:
                 raise ValueError(f"Failed to load schema from file: {e}") from e
         else:
@@ -523,8 +520,7 @@ def create_pydantic_evaluator(
         if isinstance(evaluator_value, str):
             # Handle file:// URLs and resolve relative paths
             assertion_file = evaluator_value
-            if assertion_file.startswith("file://"):
-                assertion_file = assertion_file[7:]  # Remove file:// prefix
+            assertion_file = assertion_file.removeprefix("file://")  # Remove file:// prefix
 
             # If it's a relative path, make it absolute relative to the examples directory
             if not assertion_file.startswith("/"):
@@ -534,10 +530,9 @@ def create_pydantic_evaluator(
                 assertion_file = str(Path(assertion_file).resolve())
 
             return PythonAssertionEvaluator(assertion_file=assertion_file)
-        else:
-            raise ValueError(
-                f"Python evaluator requires file path string, got: {type(evaluator_value)}"
-            )
+        raise ValueError(
+            f"Python evaluator requires file path string, got: {type(evaluator_value)}"
+        )
 
     elif evaluator_type == "exact":
         return EqualsExpected()
@@ -545,18 +540,16 @@ def create_pydantic_evaluator(
     elif evaluator_type == "contains":
         if isinstance(evaluator_value, str):
             return ContainsEvaluator(expected_substring=evaluator_value)
-        else:
-            raise ValueError(
-                f"Contains evaluator requires string value, got: {type(evaluator_value)}"
-            )
+        raise ValueError(
+            f"Contains evaluator requires string value, got: {type(evaluator_value)}"
+        )
 
     elif evaluator_type == "is_instance":
         if isinstance(evaluator_value, str):
             return IsInstance(type_name=evaluator_value)
-        else:
-            raise ValueError(
-                f"IsInstance evaluator requires type name string, got: {type(evaluator_value)}"
-            )
+        raise ValueError(
+            f"IsInstance evaluator requires type name string, got: {type(evaluator_value)}"
+        )
 
     elif evaluator_type == "llm_judge":
         # Use LLMJudge for advanced semantic evaluation
@@ -567,9 +560,8 @@ def create_pydantic_evaluator(
             if assertion_config.model:
                 judge_kwargs["model"] = assertion_config.model
             return LLMJudge(**judge_kwargs)
-        else:
-            default_rubric = "Evaluate if the output is accurate and helpful"
-            return LLMJudge(rubric=default_rubric)
+        default_rubric = "Evaluate if the output is accurate and helpful"
+        return LLMJudge(rubric=default_rubric)
 
     elif evaluator_type == "llm-rubric":
         # Promptfoo's llm-rubric evaluator
@@ -594,7 +586,7 @@ class PromptDevDataset:
         self,
         test_cases: list[dict[str, Any]],
         config: PromptDevConfig,
-        error_collector: list = None,
+        error_collector: list | None = None,
         verbose: bool = False,
     ):
         """Initialize PromptDev dataset.
@@ -770,7 +762,7 @@ class PromptDevDataset:
             return "unknown"
 
         # Check for direct type in assertion
-        if "type" in assertion_dict and assertion_dict["type"]:
+        if assertion_dict.get("type"):
             return assertion_dict["type"]
 
         # Check for template reference and resolve to get type
@@ -826,7 +818,7 @@ async def run_pydantic_evaluation(
     config: PromptDevConfig,
     verbose: bool = False,
     progress: bool = True,
-    error_collector: list = None,
+    error_collector: list | None = None,
 ) -> Any:
     """Run evaluation using PydanticAI's pydantic_evals system.
 

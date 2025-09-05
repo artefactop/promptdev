@@ -23,7 +23,7 @@ console = Console()
 
 
 def _create_wrapped_panel(
-    content: str, title: str = "", border_style: str = "dim", max_width: int = None
+    content: str, title: str = "", border_style: str = "dim", max_width: int | None = None
 ) -> Panel:
     """Create a dynamically wrapped panel that adjusts to terminal width.
 
@@ -44,7 +44,7 @@ def _create_wrapped_panel(
 
     # Create the panel with Rich's intelligent fitting
     # For output content, use a reasonable minimum width to prevent character-by-character wrapping
-    panel = Panel(
+    return Panel(
         content,
         title=title,
         border_style=border_style,
@@ -53,7 +53,6 @@ def _create_wrapped_panel(
         padding=(0, 1),  # Add some internal padding
     )
 
-    return panel
 
 
 def _create_failed_tests_tree(provider_results: dict[str, "ProviderResult"]) -> Tree:
@@ -134,7 +133,6 @@ def _create_enhanced_progress() -> Progress:
 @click.version_option()
 def cli():
     """PromptDev - Python-native prompt evaluation tool using PydanticAI."""
-    pass
 
 
 @cli.command()
@@ -295,7 +293,6 @@ def init():
 @cli.group()
 def cache():
     """Cache management commands."""
-    pass
 
 
 @cache.command("clear")
@@ -457,7 +454,7 @@ def _print_results_console(results, verbose: bool = False):
                 console.print("[yellow]Details:[/yellow]")
                 details_lines = error.details.split("\n")
                 if len(details_lines) > 10:
-                    details_lines = details_lines[:5] + ["... (truncated) ..."] + details_lines[-5:]
+                    details_lines = [*details_lines[:5], "... (truncated) ...", *details_lines[-5:]]
                 console.print("\n".join(details_lines))
 
             if error.context:
@@ -701,18 +698,17 @@ def _format_assertion_description(assertion: dict[str, Any]) -> str:
         # Python assertion
         if assertion.get("value"):
             file_path = assertion["value"]
-            if file_path.startswith("file://"):
-                file_path = file_path[7:]
+            file_path = file_path.removeprefix("file://")
             return f"Python assertion from {file_path}"
         return "Python assertion"
 
-    elif assertion_type == "contains-json":
+    if assertion_type == "contains-json":
         # JSON schema validation
         if assertion.get("template_ref"):
             return f"JSON schema validation (template: {assertion['template_ref']})"
         return "JSON schema validation"
 
-    elif assertion_type == "llm-rubric":
+    if assertion_type == "llm-rubric":
         # LLM rubric evaluation
         rubric = assertion.get("rubric", assertion.get("value", ""))
         if rubric:
@@ -720,7 +716,7 @@ def _format_assertion_description(assertion: dict[str, Any]) -> str:
             return f"LLM rubric: {rubric_preview}"
         return "LLM rubric evaluation"
 
-    elif assertion_type == "g-eval":
+    if assertion_type == "g-eval":
         # G-Eval evaluation
         criteria = assertion.get("value", "")
         if criteria:
@@ -728,17 +724,17 @@ def _format_assertion_description(assertion: dict[str, Any]) -> str:
             return f"G-Eval: {criteria_preview}"
         return "G-Eval evaluation"
 
-    elif assertion_type == "contains":
+    if assertion_type == "contains":
         # Contains string check
         value = assertion.get("value", "")
         return f"Contains: '{value}'"
 
-    elif assertion_type == "equals":
+    if assertion_type == "equals":
         # Exact match check
         value = assertion.get("value", "")
         return f"Equals: '{value}'"
 
-    elif assertion.get("ref"):
+    if assertion.get("ref"):
         # Template reference
         ref = assertion["ref"]
         if ref.startswith("#/assertionTemplates/"):
@@ -746,14 +742,13 @@ def _format_assertion_description(assertion: dict[str, Any]) -> str:
             return f"Template: {template_name}"
         return f"Reference: {ref}"
 
-    else:
-        # Generic assertion
-        if assertion.get("value"):
-            value_str = str(assertion["value"])[:50]
-            if len(str(assertion["value"])) > 50:
-                value_str += "..."
-            return f"{assertion_type}: {value_str}"
-        return f"{assertion_type} assertion"
+    # Generic assertion
+    if assertion.get("value"):
+        value_str = str(assertion["value"])[:50]
+        if len(str(assertion["value"])) > 50:
+            value_str += "..."
+        return f"{assertion_type}: {value_str}"
+    return f"{assertion_type} assertion"
 
 
 if __name__ == "__main__":

@@ -55,26 +55,35 @@ uv run promptdev --help
 
 ### Basic Usage
 
+#### If installed via pip:
 ```bash
-# Run evaluation
-promptdev eval examples/calendar_event_summary.yaml
+# Run evaluation (simple demo)
+promptdev eval examples/demo/config.yaml
+
+# Run evaluation (advanced example)
+promptdev eval examples/calendar_event_summary/config.yaml
 
 # Override provider  
-promptdev eval examples/calendar_event_summary.yaml --provider pydantic-ai:openai
+promptdev eval examples/demo/config.yaml --provider pydantic-ai:openai
 
 # Disable caching for a run
-promptdev eval examples/calendar_event_summary.yaml --no-cache
+promptdev eval examples/demo/config.yaml --no-cache
 
 # Export results
-promptdev eval examples/calendar_event_summary.yaml --output json
-promptdev eval examples/calendar_event_summary.yaml --output html
+promptdev eval examples/demo/config.yaml --output json
+promptdev eval examples/demo/config.yaml --output html
 
 # Validate configuration
-promptdev validate examples/calendar_event_summary.yaml
+promptdev validate examples/demo/config.yaml
 
 # Cache management
 promptdev cache stats
 promptdev cache clear
+```
+
+#### If running from source:
+```bash
+uv run promptdev --help
 ```
 
 ## Assertion Types
@@ -119,7 +128,7 @@ PromptDev uses YAML configuration files compatible with promptfoo format:
 description: "Calendar event summary evaluation"
 
 prompts:
-  - file://./prompts/calendar_event_summary.yaml
+  - file://./prompt.yaml
 
 providers:
   - id: "pydantic-ai:openai"
@@ -130,9 +139,9 @@ providers:
     model: "ollama:llama3.2:3b"
 
 tests:
-  - file: "./datasets/calendar_events.jsonl"
+  - file: "./calendar_events_dataset.jsonl"
 
-default_test:
+defaultTest:
   assert:
     - type: "json_schema"
       value:
@@ -143,7 +152,7 @@ default_test:
           event_type: {type: "string"}
           out_of_office: {type: "boolean"}
     - type: "python" 
-      value: "./assertions/calendar_assert.py"
+      value: "./assert.py"
     - type: "llm_judge"
       rubric: "Evaluate if the output correctly extracts calendar event information"
       model: "openai:gpt-4"
@@ -165,7 +174,7 @@ PromptDev leverages [PydanticAI's pydantic_evals system](https://ai.pydantic.dev
 Create powerful custom evaluators:
 
 ```python
-# examples/assertions/calendar_assert.py
+# examples/calendar_event_summary/assert.py
 def get_assert():
     def assert_expected(output, context):
         import json
@@ -238,16 +247,17 @@ Comprehensive evaluation reports include:
 
 ```bash
 # Setup development environment
-uv sync --extra dev
+uv sync
 
 # Run tests
 uv run pytest
 
-# Format code
-uv run ruff check promptdev/
+# Format and lint code
+uv run ruff check .
+uv run ruff format .
 
 # Type checking
-uv run mypy promptdev/
+uv run ty check
 ```
 
 ## Roadmap
@@ -284,24 +294,16 @@ We welcome contributions! Here's how to get started:
 7. Push to the branch: `git push origin feature/amazing-feature`
 8. Open a Pull Request
 
-### Development Setup
-
-```bash
-git clone https://github.com/artefactop/promptdev.git
-cd promptdev
-uv sync
-uv run pytest  # Run tests
-uv run promptdev --help  # Test CLI
-```
 
 ### Code Style
 
-We use `ruff` for code formatting and linting, and `pytest` for testing. Please ensure your code follows these standards:
+We use `ruff` for code formatting and linting, `ty` for type checking, and `pytest` for testing. Please ensure your code follows these standards:
 
 ```bash
 uv run ruff check .       # Lint code
 uv run ruff format .      # Format code
-uv run pytest           # Run tests
+uv run ty check           # Type checking
+uv run pytest            # Run tests
 ```
 
 ## License

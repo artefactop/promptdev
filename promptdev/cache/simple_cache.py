@@ -38,7 +38,7 @@ class SimpleCache:
         model: str,
         prompt_content: str,
         variables: dict[str, Any],
-        provider_config: dict[str, Any] = None,
+        provider_config: dict[str, Any] | None = None,
     ) -> str:
         """Generate a cache key from evaluation parameters.
 
@@ -63,9 +63,8 @@ class SimpleCache:
         cache_json = json.dumps(cache_data, sort_keys=True, ensure_ascii=True)
 
         # Generate SHA256 hash for the key
-        cache_key = hashlib.sha256(cache_json.encode()).hexdigest()
+        return hashlib.sha256(cache_json.encode()).hexdigest()
 
-        return cache_key
 
     def _load_cache(self) -> dict[str, Any]:
         """Load cache data from file.
@@ -150,9 +149,8 @@ class SimpleCache:
         # Extract value from entry
         if isinstance(entry, dict) and "value" in entry:
             return entry["value"]
-        else:
-            # Legacy format
-            return entry
+        # Legacy format
+        return entry
 
     def set(self, cache_key: str, value: Any, ttl: int | None = None) -> None:
         """Set a value in the cache.

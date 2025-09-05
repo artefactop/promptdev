@@ -48,7 +48,7 @@ class TestPromptDevAgent:
 
         assert agent.prompt_path == sample_prompt_file
         assert agent.provider_config == provider_config
-        assert isinstance(agent.output_type, str)
+        assert agent.output_type is str
         assert agent.system_prompt is not None
         assert agent.user_template is not None
 

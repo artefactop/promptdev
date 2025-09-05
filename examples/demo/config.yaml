@@ -1,0 +1,43 @@
+prompts:
+  - file://./prompt.yaml
+
+providers:
+  - id: "ollama_llama"
+    model: "ollama:llama3.2:3b-instruct-q8_0"
+    config:
+      base_url: "http://localhost:11434/v1"
+  - id: "ollama_gemma"
+    model: "ollama:gemma3"
+    config:
+      base_url: "http://localhost:11434/v1"
+
+defaultTest:
+  assert:
+    - type: json_schema
+      value:
+        type: object
+        properties:
+          sentiment:
+            type: string
+            enum: ["positive", "negative", "neutral"]
+        required: ["sentiment"]
+
+tests:
+  - id: "positive"
+    vars:
+      text: "I love this product!"
+      expected_output: "positive"
+  - id: "negative"
+    vars:
+      text: "This is terrible"
+      expected_output: "negative"
+  - id: "neutral"
+    vars:
+      text: "It's okay, nothing special"
+      expected_output: "neutral"
+  - id: "error"
+    vars:
+      text: "I absolutely hate this terrible product!"
+    assert:
+      - type: contains
+        value: "positive"

@@ -182,39 +182,37 @@ class PromptDevAgent:
                 provider=provider,
             )
 
-        elif model_name.startswith("openai:"):
+        if model_name.startswith("openai:"):
             # Handle OpenAI models
             from pydantic_ai.models.openai import OpenAIChatModel
 
             actual_model_name = model_name[7:]  # Remove "openai:" prefix
             return OpenAIChatModel(actual_model_name, **config)
 
-        elif model_name.startswith("anthropic:"):
+        if model_name.startswith("anthropic:"):
             # Handle Anthropic models
             from pydantic_ai.models.anthropic import AnthropicChatModel
 
             actual_model_name = model_name[10:]  # Remove "anthropic:" prefix
             return AnthropicChatModel(actual_model_name, **config)
 
-        elif model_name.startswith("test"):
+        if model_name.startswith("test"):
             # Handle test models
             from pydantic_ai.models.test import TestModel
 
             return TestModel()
 
-        else:
-            # Fallback: try to infer the model using PydanticAI's auto-detection
-            from pydantic_ai import models
+        # Fallback: try to infer the model using PydanticAI's auto-detection
+        from pydantic_ai import models
 
-            return models.infer_model(model_name)
+        return models.infer_model(model_name)
 
     def _get_model_params(self, provider_config: ProviderConfig) -> dict:
         """Extract model parameters that should be passed to Agent, not Model."""
-        model_params = {}
+        return {}
 
         # For now, we'll handle temperature through the run_sync call
         # rather than the Agent initialization, as that's more flexible
-        return model_params
 
     def _get_run_settings(self) -> dict:
         """Get model settings to pass to the run method."""

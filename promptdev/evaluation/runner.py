@@ -398,7 +398,7 @@ class EvaluationRunner:
         case_assertions = test_case.get("assertions", [])
         for assertion in case_assertions:
             if isinstance(assertion, dict):
-                assertions.append(assertion)
+                assertions.append(assertion)  # noqa: PERF401
 
         # Collect default test assertions
         if self.config.default_test and self.config.default_test.assert_:
@@ -446,8 +446,7 @@ class EvaluationRunner:
                 return ""
 
             with open(prompt_path, encoding="utf-8") as f:
-                content = f.read()
-            return content
+                return f.read()
         except Exception as e:
             if self.verbose:
                 console.print(
@@ -563,7 +562,7 @@ class EvaluationRunner:
                                             ):
                                                 reason = evaluator.last_failure_reason
                                             break
-                                        elif (
+                                        if (
                                             eval_name == "ContainsJSONEvaluator"
                                             and hasattr(evaluator, "__class__")
                                             and evaluator.__class__.__name__
@@ -641,10 +640,9 @@ class EvaluationRunner:
                 # Return average score if no failures
                 if total_evaluators > 0:
                     return total_score / total_evaluators
-                else:
-                    return 1.0 if output is not None else 0.0
+                return 1.0 if output is not None else 0.0
 
-            elif hasattr(report, "scores") and report.scores:
+            if hasattr(report, "scores") and report.scores:
                 return sum(report.scores) / len(report.scores)
 
             # Fallback to simple existence check
@@ -704,7 +702,6 @@ class EvaluationRunner:
             if self.verbose:
                 console.print(f"[red]JSON parsing failed: {e}[/red]")
             # Fall back to text-based evaluation
-            pass
 
         # Fallback evaluation when PydanticAI evaluation fails
         # Returns basic score based on output existence
@@ -727,13 +724,12 @@ class EvaluationRunner:
         """
         if isinstance(prompt, str) and prompt.startswith("file://"):
             return Path(prompt[7:])
-        elif isinstance(prompt, Path):
+        if isinstance(prompt, Path):
             return prompt
-        else:
-            # Inline prompts not currently supported - use file:// format
-            raise ValueError(
-                f"Unsupported prompt format: {prompt}. Use file:// format for prompt files."
-            )
+        # Inline prompts not currently supported - use file:// format
+        raise ValueError(
+            f"Unsupported prompt format: {prompt}. Use file:// format for prompt files."
+        )
 
     async def _run_with_progress_bar(
         self, providers_to_test: list[ProviderConfig], provider_results: list[ProviderResult]

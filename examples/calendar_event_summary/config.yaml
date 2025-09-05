@@ -1,34 +1,21 @@
-# Migrated from promptfoo/calendar_event_summary.yaml
 # PromptDev configuration with full promptfoo compatibility
 
-description: "Calendar event summary evaluation - migrated from promptfoo"
+description: "Calendar event summary evaluation - promptfoo compatible"
 
 prompts:
-  - file://./prompts/calendar_event_summary.yaml
+  - file://./prompt.yaml
 
 providers:
-  - id: "FIRST"
+  - id: "ollama_llama_3_2"
     model: "ollama:llama3.2:3b-instruct-q8_0"
     config:
       temperature: 0.0
       base_url: "http://localhost:11434/v1"
-  - id: "SECOND"
-    model: "ollama:llama3.2:3b-instruct-q8_0"
+  - id: "ollama_gemma3"
+    model: "ollama:gemma3"
     config:
       temperature: 0.0
       base_url: "http://localhost:11434/v1"
-  # - id: "pydantic-ai:together-llama"
-  #   model: "togetherai:chat:meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
-  #   config:
-  #     temperature: 0.0
-  #     apiKeyEnvar: TOGETHER_API_KEY
-  #     cache: true
-  # - id: "pydantic-ai:together-deepseek"
-  #   model: "togetherai:chat:deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
-  #   config:
-  #     temperature: 0.0
-  #     apiKeyEnvar: TOGETHER_API_KEY
-  #     cache: true
 
 defaultTest:
   options:
@@ -45,7 +32,7 @@ defaultTest:
     #   threshold: 0.7
 
 tests:
-  - file: "file://./datasets/calendar_events.jsonl"
+  - file: "file://./calendar_events_dataset.jsonl"
 
 assertionTemplates:
   containsValidJSONSchema:
@@ -54,8 +41,8 @@ assertionTemplates:
       $ref: '#/calendarEventSummarySchema'
   assertExpected:
     metric: assertExpected
-    type: python  # Promptfoo python evaluator
-    value: file://./calendar_event_summary/assert.py
+    type: python  # Promptfoo compatible python evaluator
+    value: file://./assert.py
 
 # Direct schema definition (promptfoo style)
 calendarEventSummarySchema:
@@ -78,11 +65,3 @@ calendarEventSummarySchema:
     - 'event_type'
   title: 'Calendar event summary'
   type: 'object'
-
-display:
-  include: ['prompt', 'output', 'expected', 'score', 'passed']
-  verbose: false
-
-cache:
-  enabled: true
-is_example: true

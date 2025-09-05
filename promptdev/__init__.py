@@ -12,7 +12,7 @@ from .config.models import PromptDevConfig
 from .evaluation.runner import EvaluationRunner
 
 __all__ = [
-    "PromptDevConfig",
     "EvaluationRunner",
     "PromptDevAgent",
+    "PromptDevConfig",
 ]
