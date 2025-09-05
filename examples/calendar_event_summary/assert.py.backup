@@ -1,0 +1,52 @@
+"""
+Python assertion for calendar event summary evaluation.
+"""
+
+
+def get_assert(output, context):
+    """Check if output matches expected values.
+    
+    Args:
+        output: The model output
+        context: Test context with expected values
+        
+    Returns:
+        bool: True if output matches expectations
+    """
+    try:
+        # Simple check - if output contains JSON and has expected values
+        import json
+        import re
+        
+        # Extract JSON from output
+        json_match = re.search(r'\{[^}]*\}', output, re.DOTALL)
+        if not json_match:
+            return False
+            
+        json_str = json_match.group(0)
+        data = json.loads(json_str)
+        
+        # Check expected values from context
+        expected_name = context.get("expected_name")
+        expected_out_of_office = context.get("expected_out_of_office")
+        expected_event_type = context.get("expected_event_type")
+        
+        # Basic validation
+        if expected_name and data.get("person_name") != expected_name:
+            return False
+            
+        if expected_out_of_office is not None and data.get("is_out_of_office") != expected_out_of_office:
+            return False
+            
+        # For event type, do a loose match since model might use different casing/wording
+        if expected_event_type:
+            output_event_type = data.get("event_type", "").lower()
+            expected_lower = expected_event_type.lower()
+            if expected_lower not in output_event_type and output_event_type not in expected_lower:
+                return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error in assertion: {e}")
+        return False

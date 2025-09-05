@@ -1,0 +1,27 @@
+- role: system
+  content: |
+    You are an expert at analyzing calendar event descriptions to extract structured information.
+    
+    Your task is to analyze calendar event summaries and extract:
+    1. The person's name
+    2. Whether this is an out of office event (vacation, sick leave, holiday, etc.)
+    3. The type of event
+    
+    ### **Output Format:**
+    
+    Return your answer as a JSON object following this schema:
+    ```json_schema
+    {response_schema_format}
+    ```
+    
+    Be accurate and consistent in your classifications.
+
+- role: user
+  content: |-
+    Analyze this calendar event summary and extract the required information:
+    
+    <event_summary>
+    {calendar_event_summary}
+    </event_summary>
+    
+    Extract the person's name, determine if this is an out of office event, and identify the event type.

@@ -1,0 +1,88 @@
+# Migrated from promptfoo/calendar_event_summary.yaml
+# PromptDev configuration with full promptfoo compatibility
+
+description: "Calendar event summary evaluation - migrated from promptfoo"
+
+prompts:
+  - file://./prompts/calendar_event_summary.yaml
+
+providers:
+  - id: "FIRST"
+    model: "ollama:llama3.2:3b-instruct-q8_0"
+    config:
+      temperature: 0.0
+      base_url: "http://localhost:11434/v1"
+  - id: "SECOND"
+    model: "ollama:llama3.2:3b-instruct-q8_0"
+    config:
+      temperature: 0.0
+      base_url: "http://localhost:11434/v1"
+  # - id: "pydantic-ai:together-llama"
+  #   model: "togetherai:chat:meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+  #   config:
+  #     temperature: 0.0
+  #     apiKeyEnvar: TOGETHER_API_KEY
+  #     cache: true
+  # - id: "pydantic-ai:together-deepseek"
+  #   model: "togetherai:chat:deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+  #   config:
+  #     temperature: 0.0
+  #     apiKeyEnvar: TOGETHER_API_KEY
+  #     cache: true
+
+defaultTest:
+  options:
+    provider: "pydantic-ai:together-deepseek"
+  assert:
+    # Promptfoo llm-rubric evaluator (commented out in original)
+    # - type: llm-rubric
+    #   value: does not describe self as an AI, model, or chatbot
+    - $ref: '#/assertionTemplates/assertExpected'
+    - $ref: '#/assertionTemplates/containsValidJSONSchema'
+    # Promptfoo g-eval evaluator (commented out in original)  
+    # - type: g-eval
+    #   value: 'Ensure the response is factually accurate and well-structured'
+    #   threshold: 0.7
+
+tests:
+  - file: "file://./datasets/calendar_events.jsonl"
+
+assertionTemplates:
+  containsValidJSONSchema:
+    type: contains-json  # Promptfoo evaluator type
+    value:
+      $ref: '#/calendarEventSummarySchema'
+  assertExpected:
+    metric: assertExpected
+    type: python  # Promptfoo python evaluator
+    value: file://./calendar_event_summary/assert.py
+
+# Direct schema definition (promptfoo style)
+calendarEventSummarySchema:
+  properties:
+    out_of_office:
+      description: 'Whether the event is an out of office event'
+      title: 'Out of office'
+      type: 'boolean'
+    name:
+      description: 'The name of the person who is out of office'
+      title: 'Name'
+      type: 'string'
+    event_type:
+      description: 'The type of the event'
+      title: 'Event type'
+      type: 'string'
+  required:
+    - 'out_of_office'
+    - 'name'
+    - 'event_type'
+  title: 'Calendar event summary'
+  type: 'object'
+
+display:
+  include: ['prompt', 'output', 'expected', 'score', 'passed']
+  verbose: false
+
+cache:
+  enabled: true
+is_example: true
