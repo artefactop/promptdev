@@ -78,6 +78,7 @@ class PromptDevAgent:
             elif message["role"] == "user":
                 user_content = message["content"]
 
+        # TODO: error when setting jsons
         # Handle double-brace conversion ({{var}} -> {var}) for compatibility
         system_content = system_content.replace("{{", "{").replace("}}", "}")
         user_content = user_content.replace("{{", "{").replace("}}", "}")

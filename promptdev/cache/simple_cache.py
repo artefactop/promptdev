@@ -2,10 +2,12 @@
 
 import contextlib
 import hashlib
-import json
 import time
 from pathlib import Path
 from typing import Any
+
+from pydantic_core import to_json, from_json
+from ..utils.file_utils import read_json_file, write_json_file
 
 
 class SimpleCache:
@@ -59,12 +61,11 @@ class SimpleCache:
             "provider_config": provider_config or {},
         }
 
-        # Sort keys for consistent hashing
-        cache_json = json.dumps(cache_data, sort_keys=True, ensure_ascii=True)
+        # Sort keys for consistent hashing (pydantic_core sorts by default)
+        cache_json = to_json(cache_data).decode("utf-8")
 
         # Generate SHA256 hash for the key
         return hashlib.sha256(cache_json.encode()).hexdigest()
-
 
     def _load_cache(self) -> dict[str, Any]:
         """Load cache data from file.
@@ -76,8 +77,7 @@ class SimpleCache:
             return {}
 
         try:
-            with open(self.cache_file, encoding="utf-8") as f:
-                cache_data = json.load(f)
+            cache_data = read_json_file(self.cache_file)
 
             # Check for TTL expiration if enabled
             current_time = time.time()
@@ -99,7 +99,7 @@ class SimpleCache:
 
             return valid_cache
 
-        except (OSError, json.JSONDecodeError, KeyError) as e:
+        except (OSError, ValueError, KeyError) as e:
             # If cache file is corrupted, start fresh
             print(f"Warning: Cache file corrupted, starting fresh: {e}")
             return {}
@@ -119,8 +119,7 @@ class SimpleCache:
 
             # Write cache data with atomic operation
             temp_file = self.cache_file.with_suffix(".tmp")
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(cache_data, f, indent=2, ensure_ascii=False)
+            write_json_file(temp_file, cache_data)
 
             # Atomic rename
             temp_file.replace(self.cache_file)

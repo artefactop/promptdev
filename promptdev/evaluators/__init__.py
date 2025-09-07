@@ -1,6 +1,6 @@
 """PydanticAI-based evaluators for PromptDev."""
 
-from .pydantic_evaluators import (
+from .factory import (
     PromptDevDataset,
     create_pydantic_evaluator,
     run_pydantic_evaluation,

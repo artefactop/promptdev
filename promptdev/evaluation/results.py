@@ -1,9 +1,10 @@
 """Results management for PromptDev evaluations."""
 
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+from ..utils.file_utils import write_json_file
 
 
 @dataclass
@@ -74,7 +75,14 @@ class EvaluationResults:
     provider_results: list[ProviderResult]
     config_description: str | None = None
     total_execution_time_ms: float | None = None
-    errors: list[EvaluationError] = None
+    errors: list[Any] | None = None  # TODO: define error structure
+
+    def get_provider_model(self, provider_id: str) -> str:
+        """Get model name for a given provider ID."""
+        for result in self.provider_results:
+            if result.provider_id == provider_id:
+                return result.model or "unknown"
+        return "unknown"
 
     def __post_init__(self):
         """Initialize errors list if None."""
@@ -149,8 +157,7 @@ class EvaluationResults:
 
             data["providers"].append(provider_data)
 
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        write_json_file(output_path, data)
 
     def export_html(self, output_path: Path) -> None:
         """Export results to HTML file."""

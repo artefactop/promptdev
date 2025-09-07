@@ -2,24 +2,33 @@
 
 import asyncio
 from pathlib import Path
-from typing import Any
 
 import click
 from rich.console import Console
 from rich.padding import Padding
 from rich.panel import Panel
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
 from rich.rule import Rule
 from rich.table import Table
 from rich.tree import Tree
 
-from promptdev.evaluation.results import ProviderResult
+from promptdev.evaluation.results import TestResult
 
 from .cache import clear_cache, get_cache
 from .config.loader import load_config
 from .evaluation.runner import EvaluationRunner
+from .utils.file_utils import resolve_file_path
 
 console = Console()
+
+
+def group_by_provider(tests: list[TestResult]) -> dict[str, list[TestResult]]:
+    """Group test results by provider."""
+    grouped = {}
+    for test in tests:
+        if test.provider_id not in grouped:
+            grouped[test.provider_id] = []
+        grouped[test.provider_id].append(test)
+    return grouped
 
 
 def _create_wrapped_panel(
@@ -54,81 +63,6 @@ def _create_wrapped_panel(
     )
 
 
-
-def _create_failed_tests_tree(provider_results: dict[str, "ProviderResult"]) -> Tree:
-    """Create a hierarchical tree view of failed tests using Rich.Tree."""
-
-    # Count total failures (handle None values)
-    total_failures = sum(
-        len([t for t in result.test_results if not t.passed])
-        for result in provider_results.values()
-        if result and result.test_results
-    )
-
-    if total_failures == 0:
-        return Tree("🎉 All tests passed!")
-
-    # Create root tree with balanced styling
-    root = Tree(f"[bold white]failed tests[/bold white] [dim]({total_failures} failures)[/dim]")
-
-    for provider_name, result in provider_results.items():
-        # Skip None results or results without test_results
-        if not result or not result.test_results:
-            continue
-
-        failed_tests = [t for t in result.test_results if not t.passed]
-
-        if not failed_tests:
-            continue
-
-        # Add provider branch with subtle color
-        provider_branch = root.add(
-            f"[cyan]{provider_name}[/cyan] [dim]({len(failed_tests)} failures)[/dim]"
-        )
-
-        for test in failed_tests:
-            # Add test case branch with color for visibility
-            test_branch = provider_branch.add(
-                f"[red]{test.test_name}[/red] [dim](score: {test.score:.2f})[/dim]"
-            )
-
-            # Add failed assertions as sub-branches
-            if hasattr(test, "failed_assertions") and test.failed_assertions:
-                for assertion in test.failed_assertions:
-                    assertion_name = assertion.get("assertion_name", "Unknown")
-                    assertion.get("assertion_type", "unknown")
-                    assertion.get("score", 0.0)
-                    reason = assertion.get("failure_reason", "No reason provided")
-
-                    # Handle None reasons and truncate long reasons
-                    if reason is None:
-                        reason = "No reason provided"
-                    elif len(reason) > 60:
-                        reason = reason[:57] + "..."
-
-                    test_branch.add(f"[red]{assertion_name}[/red] [dim]{reason}[/dim]")
-            else:
-                # Fallback for tests without detailed assertion info
-                test_branch.add("⚠️  Assertion details not available")
-
-    return root
-
-
-def _create_enhanced_progress() -> Progress:
-    """Create an enhanced progress bar with multiple columns."""
-    return Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TextColumn("•"),
-        TextColumn("{task.completed}/{task.total} tests"),
-        TimeRemainingColumn(),
-        console=console,
-        expand=True,
-    )
-
-
 @click.group()
 @click.version_option()
 def cli():
@@ -147,7 +81,6 @@ def cli():
 @click.option("--provider", "-p", help="Override provider for evaluation")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.option("--parallel", is_flag=True, help="Run tests in parallel")
-@click.option("--progress-bar", is_flag=True, help="Force progress bar (auto-detected by default)")
 @click.option("--no-progress-bar", is_flag=True, help="Force dots instead of progress bar")
 @click.option("--no-cache", is_flag=True, help="Disable caching for this evaluation")
 @click.option(
@@ -162,7 +95,6 @@ def eval(
     provider: str | None,
     verbose: bool,
     parallel: bool,
-    progress_bar: bool,
     no_progress_bar: bool,
     no_cache: bool,
     max_concurrent: int,
@@ -189,12 +121,12 @@ def eval(
         if no_progress_bar:
             # Explicitly disabled
             progress_bar = False
-        elif not progress_bar:
+        elif not verbose:
             # Auto-detect: use progress bar if terminal supports it and not verbose mode
             from rich.console import Console
 
             auto_console = Console()
-            progress_bar = auto_console.is_terminal and not verbose
+            progress_bar = auto_console.is_terminal
 
         # Handle cache disable flag
         if no_cache:
@@ -237,22 +169,6 @@ def eval(
 
 @cli.command()
 @click.argument("config_file", type=click.Path(exists=True, path_type=Path))
-@click.option(
-    "--output-dir", "-o", type=click.Path(path_type=Path), help="Output directory for reports"
-)
-def redteam(config_file: Path, output_dir: Path | None):
-    """Run red team security evaluation.
-
-    Examples:
-        promptdev redteam calendar_event_summary.yaml
-        promptdev redteam calendar_event_summary.yaml --output-dir ./reports
-    """
-    # Red teaming functionality planned for future release
-    console.print("[yellow]Red team evaluation coming soon![/yellow]")
-
-
-@cli.command()
-@click.argument("config_file", type=click.Path(exists=True, path_type=Path))
 def validate(config_file: Path):
     """Validate configuration file without running evaluation.
 
@@ -269,11 +185,12 @@ def validate(config_file: Path):
         # Validate prompts exist
         for prompt in config.prompts:
             if isinstance(prompt, str) and prompt.startswith("file://"):
-                prompt_path = Path(prompt[7:])
+                prompt_path = resolve_file_path(prompt)
                 if not prompt_path.exists():
                     console.print(f"[yellow]Warning: Prompt file not found: {prompt_path}[/yellow]")
                 else:
                     console.print(f"✓ Prompt file exists: {prompt_path}")
+                    #TODO: validate prompt schema
 
     except Exception as e:
         console.print(f"[red]✗ Configuration validation failed: {e}[/red]")
@@ -425,20 +342,128 @@ def _print_results_console(results, verbose: bool = False):
     if any(
         any(not test.passed for test in result.test_results) for result in results.provider_results
     ):
-        # Clean separator
         console.print()
         console.print(Rule("Failed Tests Analysis", style="red"))
 
-        # Create hierarchical tree view of failures
-        provider_results_dict = {result.provider_id: result for result in results.provider_results}
-        failed_tree = _create_failed_tests_tree(provider_results_dict)
-        console.print()
-        console.print(failed_tree)
-        console.print()
+        failed_tests = [
+            test
+            for result in results.provider_results
+            for test in result.test_results
+            if not test.passed
+        ]
+        tree = Tree(f"failed tests ({len(failed_tests)} failures)")
+
+        for provider_id, tests in group_by_provider(failed_tests).items():
+            provider_node = tree.add(f"{provider_id} ({len(tests)} failures)")
+            for test in tests:
+                test_node = provider_node.add(f"{test.test_name} (score: {test.score:.2f})")
+                if test.assertions:
+                    for assertion in test.assertions:
+                        if not assertion.get("passed", True):
+                            assertion_type = assertion.get("type", "unknown")
+                            details = assertion.get("details", "No details")
+                            test_node.add(
+                                f"{assertion_type} {details or 'Assertion details not available'}"
+                            )
+                elif test.error:
+                    test_node.add(f"Error: {test.error}")
+        console.print(tree)
+        console.print()  # Add a blank line for spacing
 
         # Detailed report separator
         console.print(Rule("Detailed Failed Tests Report", style="yellow"))
-        _print_failed_tests_by_provider(results, verbose)
+
+        failed_tests = [
+            test
+            for result in results.provider_results
+            for test in result.test_results
+            if not test.passed
+        ]
+
+        for provider_id, tests in group_by_provider(failed_tests).items():
+            provider_model = results.get_provider_model(provider_id)
+            console.print()
+            console.print(
+                f"[red bold]┌─ Provider: {provider_id} ({provider_model}) - {len(tests)} failures[/red bold]"
+            )
+            console.print(f"[red bold]└{'─' * 60}[/red bold]")
+
+            for i, test in enumerate(tests, 1):
+                # Test separator with provider context
+                console.print(f"\n  [red bold]Test {i}: {test.test_name}[/red bold]")
+                console.print("     " + "─" * 50)
+
+                # Colorful inputs display
+                if test.variables:
+                    console.print("\n     [yellow bold]📥 Inputs:[/yellow bold]")
+                    for key, value in test.variables.items():
+                        value_str = str(value)
+                        if not verbose and len(value_str) > 100:
+                            value_str = value_str[:100] + "..."
+                        console.print(f"       • [cyan]{key}:[/cyan] {value_str}")
+
+                # Show expected vs actual in clearly marked sections
+                if test.expected:
+                    console.print("\n     [green bold]✓ Expected:[/green bold]")
+                    expected_str = str(test.expected)
+                    if not verbose and len(expected_str) > 200:
+                        expected_str = expected_str[:200] + "... [use --verbose for full output]"
+
+                    expected_panel = _create_wrapped_panel(
+                        expected_str, title="", border_style="green dim"
+                    )
+                    padded_panel = Padding(expected_panel, (0, 0, 0, 7))  # Left padding of 7 spaces
+                    console.print(padded_panel)
+
+                if test.output:
+                    console.print("\n     [red bold]✗ Actual Output:[/red bold]")
+                    output_str = str(test.output)
+                    if not verbose and len(output_str) > 500:
+                        output_str = output_str[:500] + "... [use --verbose for full output]"
+
+                    output_panel = _create_wrapped_panel(
+                        output_str, title="", border_style="red dim"
+                    )
+                    padded_panel = Padding(output_panel, (0, 0, 0, 7))  # Left padding of 7 spaces
+                    console.print(padded_panel)
+
+                # Display failed assertions
+                console.print()
+                console.print("     [bold red]Failed Assertion(s):[/bold red]")
+
+                if test.assertions:
+                    failed_assertions = [a for a in test.assertions if not a.get("passed", True)]
+                    if failed_assertions:
+                        for j, assertion in enumerate(failed_assertions, 1):
+                            assertion_type = assertion.get("type", "python")
+                            assertion_score = assertion.get("score", 0.0)
+                            assertion_details = assertion.get("details", "No details")
+                            detailed_results = assertion.get("detailed_results")
+
+                            console.print(
+                                f"       {j}. {assertion_type} (type: {assertion_type}, score: {assertion_score:.2f}):"
+                            )
+
+                            # Format detailed results for python evaluator
+                            if detailed_results and isinstance(detailed_results, list):
+                                for res in detailed_results:
+                                    console.print(
+                                        f"           {res.get('field')}: {res.get('actual')} != {res.get('expected')}"
+                                    )
+                            else:
+                                console.print(f"           {assertion_details}")
+                    else:
+                        console.print(
+                            "       ⚠️  No failed assertions found, but test failed (score < 1.0)."
+                        )
+                elif test.error:
+                    console.print(f"       [bold red]Execution error:[/bold red] {test.error}")
+                else:
+                    console.print("       ⚠️  No assertion results available for this failed test.")
+
+                console.print()
+                console.print("     " + "─" * 50)
+                console.print()
 
     # Show error summary if there were any errors during evaluation
     if results.errors:
@@ -570,185 +595,6 @@ def _print_provider_comparison(results):
         table.add_row(*summary_row)
 
     console.print(table)
-
-
-def _print_failed_tests_by_provider(results, verbose: bool = False):
-    """Print failed tests grouped by provider using hierarchical tree format."""
-    # Collect all failed tests
-    all_failed = {}
-    total_failures = 0
-    for provider_result in results.provider_results:
-        failed_tests = [tr for tr in provider_result.test_results if not tr.passed]
-        if failed_tests:
-            all_failed[provider_result.provider_id] = failed_tests
-            total_failures += len(failed_tests)
-
-    if not all_failed:
-        console.print("\n[green]🎉 All tests passed across all providers![/green]")
-        return
-
-    # Detailed report section
-    console.print("[bold white]failures:[/bold white]")
-    console.print()
-
-    for provider_id, failed_tests in all_failed.items():
-        # Find the provider result to get model info
-        provider_result = next(
-            (p for p in results.provider_results if p.provider_id == provider_id), None
-        )
-        model_info = (
-            provider_result.model if provider_result and provider_result.model else "unknown model"
-        )
-
-        # Always show provider header with model info
-        console.print(
-            f"\n[red bold]┌─ Provider: {provider_id} ({model_info}) - {len(failed_tests)} failures[/red bold]"
-        )
-        console.print(f"[red bold]└{'─' * 60}[/red bold]")
-
-        for i, test_result in enumerate(failed_tests, 1):
-            # Test separator with provider context
-            console.print(f"\n  [red bold]Test {i}: {test_result.test_name}[/red bold]")
-            console.print("     " + "─" * 50)
-
-            # Colorful inputs display
-            if test_result.variables:
-                console.print("     [yellow bold]📥 Inputs:[/yellow bold]")
-                for key, value in test_result.variables.items():
-                    value_str = str(value)
-                    if len(value_str) > 100:
-                        value_str = value_str[:100] + "..."
-                    console.print(f"       • [cyan]{key}:[/cyan] {value_str}")
-
-            # Show expected vs actual in clearly marked sections
-            if test_result.expected:
-                console.print("\n     [green bold]✓ Expected:[/green bold]")
-                expected_str = str(test_result.expected)
-                if not verbose and len(expected_str) > 200:
-                    expected_str = expected_str[:200] + "... [use --verbose for full output]"
-
-                # Use our dynamic wrapping with green styling
-                expected_panel = _create_wrapped_panel(
-                    expected_str, title="", border_style="green dim"
-                )
-                padded_panel = Padding(expected_panel, (0, 0, 0, 7))  # Left padding of 7 spaces
-                console.print(padded_panel)
-
-            if test_result.output:
-                console.print("\n     [red bold]✗ Actual Output:[/red bold]")
-                output_str = str(test_result.output)
-                if not verbose and len(output_str) > 500:
-                    output_str = output_str[:500] + "... [use --verbose for full output]"
-
-                # Use our dynamic wrapping with red styling
-                output_panel = _create_wrapped_panel(output_str, title="", border_style="red dim")
-                padded_panel = Padding(output_panel, (0, 0, 0, 7))  # Left padding of 7 spaces
-                console.print(padded_panel)
-
-            # Show failed assertions with detailed results (restored)
-            if hasattr(test_result, "failed_assertions") and test_result.failed_assertions:
-                console.print("\n     [red bold]Failed Assertion(s):[/red bold]")
-                assertion_counter = 1
-
-                for failed_assertion in test_result.failed_assertions:
-                    evaluator_name = failed_assertion.get("evaluator_name", "Unknown")
-                    assertion_name = failed_assertion.get("assertion_name", evaluator_name)
-                    assertion_type = failed_assertion.get("assertion_type", "unknown")
-                    score = failed_assertion.get("score", 0.0)
-                    detailed_results = failed_assertion.get("detailed_results")
-
-                    if evaluator_name == "PythonAssertionEvaluator" and detailed_results:
-                        # Show assertion name with type, then detailed field-by-field results
-                        console.print(
-                            f"       {assertion_counter}. [red]{assertion_name}[/red] (type: {assertion_type}, score: {score:.2f}):"
-                        )
-                        for detail in detailed_results:
-                            field_name = detail.get("field", "Unknown Field")
-                            actual = detail.get("actual")
-                            expected = detail.get("expected")
-                            console.print(f"           {field_name}: {actual} != {expected}")
-                        assertion_counter += 1
-                    else:
-                        # Show assertion name for other evaluators
-                        failure_reason = failed_assertion.get("failure_reason", "Unknown reason")
-                        console.print(
-                            f"       {assertion_counter}. [red]{assertion_name}[/red] (type: {assertion_type}, score: {score:.2f}): {failure_reason}"
-                        )
-                        assertion_counter += 1
-
-            elif test_result.assertions:
-                console.print("\n     [yellow bold]⚠️  All Assertions Failed:[/yellow bold]")
-                for j, assertion in enumerate(test_result.assertions, 1):
-                    assertion_desc = _format_assertion_description(assertion)
-                    console.print(f"       {j}. {assertion_desc}")
-
-            if test_result.error:
-                console.print("\n     [red bold]💥 Error:[/red bold]")
-                console.print(f"       {test_result.error}")
-
-            # End of test separator with proper spacing
-            console.print(f"\n     [dim]{'─' * 50}[/dim]")
-
-
-def _format_assertion_description(assertion: dict[str, Any]) -> str:
-    """Format assertion information for display."""
-    assertion_type = assertion.get("type", "unknown")
-
-    if assertion_type == "python":
-        # Python assertion
-        if assertion.get("value"):
-            file_path = assertion["value"]
-            file_path = file_path.removeprefix("file://")
-            return f"Python assertion from {file_path}"
-        return "Python assertion"
-
-    if assertion_type == "contains-json":
-        # JSON schema validation
-        if assertion.get("template_ref"):
-            return f"JSON schema validation (template: {assertion['template_ref']})"
-        return "JSON schema validation"
-
-    if assertion_type == "llm-rubric":
-        # LLM rubric evaluation
-        rubric = assertion.get("rubric", assertion.get("value", ""))
-        if rubric:
-            rubric_preview = rubric[:50] + "..." if len(rubric) > 50 else rubric
-            return f"LLM rubric: {rubric_preview}"
-        return "LLM rubric evaluation"
-
-    if assertion_type == "g-eval":
-        # G-Eval evaluation
-        criteria = assertion.get("value", "")
-        if criteria:
-            criteria_preview = criteria[:50] + "..." if len(criteria) > 50 else criteria
-            return f"G-Eval: {criteria_preview}"
-        return "G-Eval evaluation"
-
-    if assertion_type == "contains":
-        # Contains string check
-        value = assertion.get("value", "")
-        return f"Contains: '{value}'"
-
-    if assertion_type == "equals":
-        # Exact match check
-        value = assertion.get("value", "")
-        return f"Equals: '{value}'"
-
-    if assertion.get("ref"):
-        # Template reference
-        ref = assertion["ref"]
-        if ref.startswith("#/assertionTemplates/"):
-            template_name = ref[len("#/assertionTemplates/") :]
-            return f"Template: {template_name}"
-        return f"Reference: {ref}"
-
-    # Generic assertion
-    if assertion.get("value"):
-        value_str = str(assertion["value"])[:50]
-        if len(str(assertion["value"])) > 50:
-            value_str += "..."
-        return f"{assertion_type}: {value_str}"
-    return f"{assertion_type} assertion"
 
 
 if __name__ == "__main__":
