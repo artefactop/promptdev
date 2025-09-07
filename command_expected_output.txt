@@ -1,0 +1,415 @@
+# Running command: uv run promptdev eval examples/calendar_event_summary/config.yaml --no-cache
+
+Evaluating 2 provider(s) with 6 test(s) each...
+  ollama_llama_3_2 ✗ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6/6 0:00:22
+  ollama_gemma3 ✗    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6/6 0:00:11
+
+🔍 Provider Comparison
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃           ┃                                                              ┃  ollama_llama_3_2  ┃ ollama_gemma3 ┃
+┃ Test Case ┃ Input                                                        ┃ (3b-instruct-q8_0) ┃   (gemma3)    ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ test_1    │ calendar_event_summary: John Smith - Vacation                │       ✔ 1.00       │    ✔ 1.00     │
+│ test_2    │ calendar_event_summary: Jane Doe - Team Meeting              │       ✗ 0.00       │    ✗ 0.00     │
+│ test_3    │ calendar_event_summary: Bob Wilson - Sick Leave              │       ✗ 0.00       │    ✔ 1.00     │
+│ test_4    │ calendar_event_summary: Alice Brown - National Holiday       │       ✗ 0.00       │    ✗ 0.00     │
+│ test_5    │ calendar_event_summary: Charlie Davis - Birthday Celebration │       ✗ 0.00       │    ✗ 0.00     │
+│ test_6    │ calendar_event_summary: Medical appointment with specialist  │       ✗ 0.00       │    ✗ 0.00     │
+│ Overall   │                                                              │    0.17 (16.7%)    │ 0.33 (33.3%)  │
+└───────────┴──────────────────────────────────────────────────────────────┴────────────────────┴───────────────┘
+
+================================================================================
+
+
+Evaluation Summary: ollama_llama_3_2 (ollama:llama3.2:3b-instruct-q8_0)
+1 passed, 5 failed (16.7% pass rate)
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Case ID  ┃ Inputs                                                                                 ┃ Outputs                                               ┃   Scores    ┃ Assertions ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ test_1   │ calendar_event_summary: John Smith - Vacation, response_schema_format: {"type":        │ Here is the extracted information in JSON format:     │ Score: 1.00 │     ✔      │
+│          │ "object", "properties...                                                               │ ...                                                   │             │            │
+│ test_2   │ calendar_event_summary: Jane Doe - Team Meeting, response_schema_format: {"type":      │ Based on the provided calendar event summary, here... │ Score: 0.00 │     ✗      │
+│          │ "object", "properties...                                                               │                                                       │             │            │
+│ test_3   │ calendar_event_summary: Bob Wilson - Sick Leave, response_schema_format: {"type":      │ Here is the extracted information in JSON format:     │ Score: 0.00 │     ✗      │
+│          │ "object", "properties...                                                               │ ...                                                   │             │            │
+│ test_4   │ calendar_event_summary: Alice Brown - National Holiday, response_schema_format:        │ Here is the extracted information in JSON format:     │ Score: 0.00 │     ✗      │
+│          │ {"type": "object", "properties...                                                      │ ...                                                   │             │            │
+│ test_5   │ calendar_event_summary: Charlie Davis - Birthday Celeb..., response_schema_format:     │ Here is the extracted information in JSON format:     │ Score: 0.00 │     ✗      │
+│          │ {"type": "object", "properties...                                                      │ ...                                                   │             │            │
+│ test_6   │ calendar_event_summary: Medical appointment with speci..., response_schema_format:     │ Here is the extracted information in JSON format:     │ Score: 0.00 │     ✗      │
+│          │ {"type": "object", "properties...                                                      │ ...                                                   │             │            │
+│ Averages │                                                                                        │                                                       │ Score: 0.17 │  16.7% ✔   │
+└──────────┴────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────┴─────────────┴────────────┘
+
+Evaluation Summary: ollama_gemma3 (ollama:gemma3)
+2 passed, 4 failed (33.3% pass rate)
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Case ID  ┃ Inputs                                                                                         ┃ Outputs                                       ┃   Scores    ┃ Assertions ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ test_1   │ calendar_event_summary: John Smith - Vacation, response_schema_format: {"type": "object",      │ ```json                                       │ Score: 1.00 │     ✔      │
+│          │ "properties...                                                                                 │ {"name": "John Smith", "out_of_office": tr... │             │            │
+│ test_2   │ calendar_event_summary: Jane Doe - Team Meeting, response_schema_format: {"type": "object",    │ ```json                                       │ Score: 0.00 │     ✗      │
+│          │ "properties...                                                                                 │ {"type": "object", "properties": {"name": ... │             │            │
+│ test_3   │ calendar_event_summary: Bob Wilson - Sick Leave, response_schema_format: {"type": "object",    │ ```json                                       │ Score: 1.00 │     ✔      │
+│          │ "properties...                                                                                 │ {"name": "Bob Wilson", "out_of_office": tr... │             │            │
+│ test_4   │ calendar_event_summary: Alice Brown - National Holiday, response_schema_format: {"type":       │ ```json                                       │ Score: 0.00 │     ✗      │
+│          │ "object", "properties...                                                                       │ {"type": "object", "properties": {"name": ... │             │            │
+│ test_5   │ calendar_event_summary: Charlie Davis - Birthday Celeb..., response_schema_format: {"type":    │ ```json                                       │ Score: 0.00 │     ✗      │
+│          │ "object", "properties...                                                                       │ {"type": "object", "properties": {"name": ... │             │            │
+│ test_6   │ calendar_event_summary: Medical appointment with speci..., response_schema_format: {"type":    │ ```json                                       │ Score: 0.00 │     ✗      │
+│          │ "object", "properties...                                                                       │ {"type": "object", "properties": {"name": ... │             │            │
+│ Averages │                                                                                                │                                               │ Score: 0.33 │  33.3% ✔   │
+└──────────┴────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────┴─────────────┴────────────┘
+
+──────────────────────────────────────────────────────────────────────────────── Failed Tests Analysis ─────────────────────────────────────────────────────────────────────────────────
+
+failed tests (9 failures)
+├── ollama_llama_3_2 (5 failures)
+│   ├── test_2 (score: 0.00)
+│   │   └── python Field validation results: 1 failed checks
+│   ├── test_3 (score: 0.00)
+│   │   └── python Field validation results: 1 failed checks
+│   ├── test_4 (score: 0.00)
+│   │   └── python Field validation results: 2 failed checks
+│   ├── test_5 (score: 0.00)
+│   │   └── python Field validation results: 1 failed checks
+│   └── test_6 (score: 0.00)
+│       └── python Field validation results: 2 failed checks
+└── ollama_gemma3 (4 failures)
+    ├── test_2 (score: 0.00)
+    │   └── python Field validation results: 3 failed checks
+    ├── test_4 (score: 0.00)
+    │   └── python Field validation results: 3 failed checks
+    ├── test_5 (score: 0.00)
+    │   └── python Field validation results: 3 failed checks
+    └── test_6 (score: 0.00)
+        └── python Field validation results: 3 failed checks
+
+───────────────────────────────────────────────────────────────────────────── Detailed Failed Tests Report ─────────────────────────────────────────────────────────────────────────────
+failures:
+
+
+┌─ Provider: ollama_llama_3_2 (ollama:llama3.2:3b-instruct-q8_0) - 5 failures
+└────────────────────────────────────────────────────────────
+
+  Test 1: test_2
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Jane Doe
+       • expected_out_of_office: False
+       • expected_event_type: meeting
+       • calendar_event_summary: Jane Doe - Team Meeting
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭───────────────────────────────────────────────────────────────────────╮                                                                                                        
+       │ {'name': 'Jane Doe', 'out_of_office': False, 'event_type': 'meeting'} │                                                                                                        
+       ╰───────────────────────────────────────────────────────────────────────╯                                                                                                        
+
+     ✗ Actual Output:
+       ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮      
+       │ Based on the provided calendar event summary, here is the extracted information in JSON format:                                                                         │      
+       │                                                                                                                                                                         │      
+       │ ```json                                                                                                                                                                 │      
+       │ {                                                                                                                                                                       │      
+       │   "name": "Jane Doe",                                                                                                                                                   │      
+       │   "out_of_office": false,                                                                                                                                               │      
+       │   "event_type": "Team Meeting"                                                                                                                                          │      
+       │ }                                                                                                                                                                       │      
+       │ ```                                                                                                                                                                     │      
+       │                                                                                                                                                                         │      
+       │ Explanation of the extraction:                                                                                                                                          │      
+       │                                                                                                                                                                         │      
+       │ * The person's name is "Jane Doe".                                                                                                                                      │      
+       │ * Since there is no mention of a vacation, sick leave, holiday, or any other out-of-office reason in the summary, I have classified this as not an out-of-office event. │      
+       │ * The type of event is a Team Meeting.                                                                                                                                  │      
+       ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯      
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.67):
+           Event Type: Team Meeting != meeting
+
+     ──────────────────────────────────────────────────
+
+  Test 2: test_3
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Bob Wilson
+       • expected_out_of_office: True
+       • expected_event_type: sick leave
+       • calendar_event_summary: Bob Wilson - Sick Leave
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭───────────────────────────────────────────────────────────────────────────╮                                                                                                    
+       │ {'name': 'Bob Wilson', 'out_of_office': True, 'event_type': 'sick leave'} │                                                                                                    
+       ╰───────────────────────────────────────────────────────────────────────────╯                                                                                                    
+
+     ✗ Actual Output:
+       ╭───────────────────────────────────────────────────────────────────────────────────────────────────╮                                                                            
+       │ Here is the extracted information in JSON format:                                                 │                                                                            
+       │                                                                                                   │                                                                            
+       │ ```json                                                                                           │                                                                            
+       │ {                                                                                                 │                                                                            
+       │   "name": "Bob Wilson",                                                                           │                                                                            
+       │   "out_of_office": false,                                                                         │                                                                            
+       │   "event_type": "Sick Leave"                                                                      │                                                                            
+       │ }                                                                                                 │                                                                            
+       │ ```                                                                                               │                                                                            
+       │                                                                                                   │                                                                            
+       │ Explanation:                                                                                      │                                                                            
+       │                                                                                                   │                                                                            
+       │ * The person's name is "Bob Wilson".                                                              │                                                                            
+       │ * Since the event type is explicitly mentioned as "Sick Leave", it is not an out of office event. │                                                                            
+       │ * The event type is indeed "Sick Leave".                                                          │                                                                            
+       ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯                                                                            
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.67):
+           Out of Office: False != True
+
+     ──────────────────────────────────────────────────
+
+  Test 3: test_4
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Alice Brown
+       • expected_out_of_office: True
+       • expected_event_type: holiday
+       • calendar_event_summary: Alice Brown - National Holiday
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭─────────────────────────────────────────────────────────────────────────╮                                                                                                      
+       │ {'name': 'Alice Brown', 'out_of_office': True, 'event_type': 'holiday'} │                                                                                                      
+       ╰─────────────────────────────────────────────────────────────────────────╯                                                                                                      
+
+     ✗ Actual Output:
+       ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮                                
+       │ Here is the extracted information in JSON format:                                                                                             │                                
+       │                                                                                                                                               │                                
+       │ ```json                                                                                                                                       │                                
+       │ {                                                                                                                                             │                                
+       │   "name": "Alice Brown",                                                                                                                      │                                
+       │   "out_of_office": false,                                                                                                                     │                                
+       │   "event_type": "National Holiday"                                                                                                            │                                
+       │ }                                                                                                                                             │                                
+       │ ```                                                                                                                                           │                                
+       │                                                                                                                                               │                                
+       │ Explanation:                                                                                                                                  │                                
+       │                                                                                                                                               │                                
+       │ * The person's name is "Alice Brown".                                                                                                         │                                
+       │ * Since the event summary does not explicitly mention a vacation, sick leave, or other out-of-office reason, I have classified it as `false`. │                                
+       │ * The event type is a "National Holiday".                                                                                                     │                                
+       ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯                                
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.33):
+           Out of Office: False != True
+           Event Type: National Holiday != holiday
+
+     ──────────────────────────────────────────────────
+
+  Test 4: test_5
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Charlie Davis
+       • expected_out_of_office: False
+       • expected_event_type: birthday
+       • calendar_event_summary: Charlie Davis - Birthday Celebration
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭─────────────────────────────────────────────────────────────────────────────╮                                                                                                  
+       │ {'name': 'Charlie Davis', 'out_of_office': False, 'event_type': 'birthday'} │                                                                                                  
+       ╰─────────────────────────────────────────────────────────────────────────────╯                                                                                                  
+
+     ✗ Actual Output:
+       ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮                                            
+       │ Here is the extracted information in JSON format:                                                                                 │                                            
+       │                                                                                                                                   │                                            
+       │ ```json                                                                                                                           │                                            
+       │ {                                                                                                                                 │                                            
+       │   "name": "Charlie Davis",                                                                                                        │                                            
+       │   "out_of_office": false,                                                                                                         │                                            
+       │   "event_type": "Birthday Celebration"                                                                                            │                                            
+       │ }                                                                                                                                 │                                            
+       │ ```                                                                                                                               │                                            
+       │                                                                                                                                   │                                            
+       │ Explanation:                                                                                                                      │                                            
+       │                                                                                                                                   │                                            
+       │ * The person's name is Charlie Davis.                                                                                             │                                            
+       │ * This is not an out of office event, as indicated by the absence of any keywords such as "vacation", "sick leave", or "holiday". │                                            
+       │ * The type of event is a Birthday Celebration.                                                                                    │                                            
+       ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯                                            
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.67):
+           Event Type: Birthday Celebration != birthday
+
+     ──────────────────────────────────────────────────
+
+  Test 5: test_6
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Dr. Williams
+       • expected_out_of_office: False
+       • expected_event_type: consultation
+       • calendar_event_summary: Medical appointment with specialist
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭────────────────────────────────────────────────────────────────────────────────╮                                                                                               
+       │ {'name': 'Dr. Williams', 'out_of_office': False, 'event_type': 'consultation'} │                                                                                               
+       ╰────────────────────────────────────────────────────────────────────────────────╯                                                                                               
+
+     ✗ Actual Output:
+       ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮                      
+       │ Here is the extracted information in JSON format:                                                                                                       │                      
+       │                                                                                                                                                         │                      
+       │ ```json                                                                                                                                                 │                      
+       │ {                                                                                                                                                       │                      
+       │   "name": null,                                                                                                                                         │                      
+       │   "out_of_office": false,                                                                                                                               │                      
+       │   "event_type": "Medical appointment"                                                                                                                   │                      
+       │ }                                                                                                                                                       │                      
+       │ ```                                                                                                                                                     │                      
+       │                                                                                                                                                         │                      
+       │ Explanation:                                                                                                                                            │                      
+       │                                                                                                                                                         │                      
+       │ * The person's name is not explicitly mentioned in the summary, so I set `name` to `null`.                                                              │                      
+       │ * Since there is no indication that this event is related to an out-of-office period (e.g., vacation, sick leave, holiday), I classified it as `false`. │                      
+       │ * The type of event is clearly stated as a "Medical appointment", which I identified as the `ev...                                                      │                      
+       ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯                      
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.33):
+           Name: None != Dr. Williams
+           Event Type: Medical appointment != consultation
+
+     ──────────────────────────────────────────────────
+
+┌─ Provider: ollama_gemma3 (ollama:gemma3) - 4 failures
+└────────────────────────────────────────────────────────────
+
+  Test 1: test_2
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Jane Doe
+       • expected_out_of_office: False
+       • expected_event_type: meeting
+       • calendar_event_summary: Jane Doe - Team Meeting
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭───────────────────────────────────────────────────────────────────────╮                                                                                                        
+       │ {'name': 'Jane Doe', 'out_of_office': False, 'event_type': 'meeting'} │                                                                                                        
+       ╰───────────────────────────────────────────────────────────────────────╯                                                                                                        
+
+     ✗ Actual Output:
+       ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮            
+       │ ```json                                                                                                                                                           │            
+       │ {"type": "object", "properties": {"name": "Jane Doe", "out_of_office": false, "event_type": "Team Meeting"}, "required": ["name", "out_of_office", "event_type"]} │            
+       │ ```                                                                                                                                                               │            
+       ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯            
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.00):
+           Name: None != Jane Doe
+           Out of Office: None != False
+           Event Type:  != meeting
+
+     ──────────────────────────────────────────────────
+
+  Test 2: test_4
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Alice Brown
+       • expected_out_of_office: True
+       • expected_event_type: holiday
+       • calendar_event_summary: Alice Brown - National Holiday
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭─────────────────────────────────────────────────────────────────────────╮                                                                                                      
+       │ {'name': 'Alice Brown', 'out_of_office': True, 'event_type': 'holiday'} │                                                                                                      
+       ╰─────────────────────────────────────────────────────────────────────────╯                                                                                                      
+
+     ✗ Actual Output:
+       ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮      
+       │ ```json                                                                                                                                                                 │      
+       │ {"type": "object", "properties": {"name": "Alice Brown", "out_of_office": true, "event_type": "National Holiday"}, "required": ["name", "out_of_office", "event_type"]} │      
+       │ ```                                                                                                                                                                     │      
+       ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯      
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.00):
+           Name: None != Alice Brown
+           Out of Office: None != True
+           Event Type:  != holiday
+
+     ──────────────────────────────────────────────────
+
+  Test 3: test_5
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Charlie Davis
+       • expected_out_of_office: False
+       • expected_event_type: birthday
+       • calendar_event_summary: Charlie Davis - Birthday Celebration
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭─────────────────────────────────────────────────────────────────────────────╮                                                                                                  
+       │ {'name': 'Charlie Davis', 'out_of_office': False, 'event_type': 'birthday'} │                                                                                                  
+       ╰─────────────────────────────────────────────────────────────────────────────╯                                                                                                  
+
+     ✗ Actual Output:
+       ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮   
+       │ ```json                                                                                                                                                                    │   
+       │ {"type": "object", "properties": {"name": "Charlie Davis", "out_of_office": false, "event_type": "Birthday Celebration"}, "required": ["name", "out_of_office",            │   
+       │ "event_type"]}                                                                                                                                                             │   
+       │ ```                                                                                                                                                                        │   
+       ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯   
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.00):
+           Name: None != Charlie Davis
+           Out of Office: None != False
+           Event Type:  != birthday
+
+     ──────────────────────────────────────────────────
+
+  Test 4: test_6
+     ──────────────────────────────────────────────────
+     📥 Inputs:
+       • expected_name: Dr. Williams
+       • expected_out_of_office: False
+       • expected_event_type: consultation
+       • calendar_event_summary: Medical appointment with specialist
+       • response_schema_format: {"type": "object", "properties": {"name": {"type": "string", "description": "The name of the person ...
+
+     ✓ Expected:
+       ╭────────────────────────────────────────────────────────────────────────────────╮                                                                                               
+       │ {'name': 'Dr. Williams', 'out_of_office': False, 'event_type': 'consultation'} │                                                                                               
+       ╰────────────────────────────────────────────────────────────────────────────────╯                                                                                               
+
+     ✗ Actual Output:
+       ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮      
+       │ ```json                                                                                                                                                                 │      
+       │ {"type": "object", "properties": {"name": "Unknown", "out_of_office": false, "event_type": "Medical Appointment"}, "required": ["name", "out_of_office", "event_type"]} │      
+       │ ```                                                                                                                                                                     │      
+       ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯      
+
+     Failed Assertion(s):
+       1. python (type: python, score: 0.00):
+           Name: None != Dr. Williams
+           Out of Office: None != False
+           Event Type:  != consultation
+
+     ──────────────────────────────────────────────────
+
+================================================================================
+
+✅ Evaluation completed successfully!
+================================================================================

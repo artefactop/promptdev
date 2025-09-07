@@ -1,4 +1,4 @@
-"""PromptDev main entry point."""
+"""Promptdev main entry point."""
 
 from promptdev.cli import cli
 

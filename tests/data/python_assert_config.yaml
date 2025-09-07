@@ -1,0 +1,16 @@
+description: "Simple python assertion configuration"
+
+prompts:
+  - file://./simple_prompt.yaml
+
+providers:
+  - id: "test_provider"
+    model: "promptdev:echo"
+
+tests:
+  - description: "Simple validation test"
+    vars:
+      text: "success"
+    assert:
+      - type: python
+        value: file://./python_assert.py

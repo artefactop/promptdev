@@ -46,8 +46,8 @@ jobs:
 
       - name: Run Safety check
         run: |
-          uv run safety check --json --output safety-report.json || echo "Safety check failed - dependency may have conflicts"
-          uv run safety check || echo "Safety check completed with issues"
+          uvx safety check --json --output safety-report.json || echo "Safety check failed - dependency may have conflicts"
+          uvx safety check || echo "Safety check completed with issues"
 
       - name: Upload security reports
         uses: actions/upload-artifact@v4

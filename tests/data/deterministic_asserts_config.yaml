@@ -1,0 +1,127 @@
+description: "Comprehensive integration test for all pydantic evaluators"
+
+prompts:
+  - file://./simple_prompt.yaml
+
+providers:
+  - id: "test_provider"
+    model: "promptdev:echo"
+
+tests:
+  # CONTAINS evaluator tests
+  - description: "Contains evaluator - PASS"
+    vars:
+      text: "This is a positive response"
+    assert:
+      - type: contains
+        value: "positive"
+
+  - description: "Contains evaluator - FAIL"
+    vars:
+      text: "This is a negative response"
+    assert:
+      - type: contains
+        value: "positive"
+
+  # EQUALS evaluator tests
+  - description: "Equals evaluator - PASS"
+    vars:
+      text: "exact match"
+    assert:
+      - type: equals
+        value: "exact match"
+
+  - description: "Equals evaluator - FAIL"
+    vars:
+      text: "different text"
+    assert:
+      - type: equals
+        value: "exact match"
+
+  # JSON_SCHEMA evaluator tests
+  - description: "JSON Schema evaluator - PASS"
+    vars:
+      text: '{"status": "success", "value": 42}'
+    assert:
+      - type: is_json
+        value:
+          type: object
+          properties:
+            status:
+              type: string
+            value:
+              type: number
+          required: ["status", "value"]
+
+  - description: "JSON Schema evaluator - FAIL"
+    vars:
+      text: '{"status": "success"}'  # Missing required "value" field
+    assert:
+      - type: is_json
+        value:
+          type: object
+          properties:
+            status:
+              type: string
+            value:
+              type: number
+          required: ["status", "value"]
+
+  # CONTAINS-JSON evaluator tests
+  - description: "Contains-JSON evaluator - PASS"
+    vars:
+      text: 'Result: {"name": "John", "age": 30}'
+    assert:
+      - type: contains_json
+        value:
+          type: object
+          properties:
+            name:
+              type: string
+            age:
+              type: number
+          required: ["name", "age"]
+
+  - description: "Contains-JSON evaluator - FAIL"
+    vars:
+      text: 'Result: {"name": "John"}'  # Missing required "age" field
+    assert:
+      - type: contains_json
+        value:
+          type: object
+          properties:
+            name:
+              type: string
+            age:
+              type: number
+          required: ["name", "age"]
+
+  # PYTHON evaluator tests
+  - description: "Python evaluator - PASS"
+    vars:
+      text: "This operation was a success"
+    assert:
+      - type: python
+        value: file://./python_assert.py
+
+  - description: "Python evaluator - FAIL"
+    vars:
+      text: "This operation failed"
+    assert:
+      - type: python
+        value: file://./python_assert.py
+
+  # IS_INSTANCE evaluator tests
+  - description: "IsInstance evaluator - PASS"
+    vars:
+      text: "hello world"
+    assert:
+      - type: is_instance
+        value: "str"
+
+  - description: "IsInstance evaluator - FAIL"
+    vars:
+      text: "123"  # This will be a string, but we're checking for int
+    assert:
+      - type: is_instance
+        value: "int"

@@ -1,4 +1,4 @@
-# PromptDev configuration with full promptfoo compatibility
+# Promptdev configuration with full promptfoo compatibility
 
 description: "Calendar event summary evaluation - promptfoo compatible"
 
@@ -36,7 +36,7 @@ tests:
 
 assertionTemplates:
   containsValidJSONSchema:
-    type: contains-json  # Promptfoo evaluator type
+    type: contains_json  # Promptfoo evaluator type
     value:
       $ref: '#/calendarEventSummarySchema'
   assertExpected:

@@ -1,13 +1,17 @@
-"""Simple file-based cache for PromptDev evaluations."""
-
 import contextlib
 import hashlib
 import time
 from pathlib import Path
 from typing import Any
 
-from pydantic_core import to_json, from_json
-from ..utils.file_utils import read_json_file, write_json_file
+from pydantic_core import to_json
+
+from promptdev.utils.file import read_json_file, write_json_file
+
+
+class CacheManager:
+    def __init__(self, enabled: bool = True, cache_dir: Path | None = None):
+        self.cache = SimpleCache(enabled, cache_dir)
 
 
 class SimpleCache:
@@ -220,27 +224,3 @@ class SimpleCache:
             "cache_file_size_bytes": file_size,
             "keys": list(cache_data.keys())[:10],  # Show first 10 keys for debugging
         }
-
-
-# Global cache instance
-_cache_instance: SimpleCache | None = None
-
-
-def get_cache() -> SimpleCache:
-    """Get the global cache instance."""
-    global _cache_instance
-    if _cache_instance is None:
-        _cache_instance = SimpleCache()
-    return _cache_instance
-
-
-def set_cache_enabled(enabled: bool) -> None:
-    """Enable or disable the global cache."""
-    cache = get_cache()
-    cache.enabled = enabled
-
-
-def clear_cache() -> None:
-    """Clear the global cache."""
-    cache = get_cache()
-    cache.clear()

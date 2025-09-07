@@ -92,7 +92,7 @@ jobs:
       - name: Run security scan
         run: |
           uv run ruff check --select S --exclude tests/
-          uv run safety check || echo "Safety check completed with issues"
+          uvx safety check || echo "Safety check completed with issues"
 
   build:
     name: Build Package

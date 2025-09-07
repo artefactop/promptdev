@@ -128,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# PromptDev specific
+# Promptdev specific
 .promptdev_cache/
 examples/cache/
 *.cache

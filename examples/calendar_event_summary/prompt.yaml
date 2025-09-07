@@ -10,7 +10,7 @@
     ### **Output Format:**
     
     Return your answer as a JSON object following this schema:
-    ```json_schema
+    ```is_json
     {response_schema_format}
     ```
     

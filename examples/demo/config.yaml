@@ -1,19 +1,19 @@
 prompts:
   - file://./prompt.yaml
+  - "Extract the sentiment from: {text}"
 
 providers:
   - id: "ollama_llama"
     model: "ollama:llama3.2:3b-instruct-q8_0"
     config:
       base_url: "http://localhost:11434/v1"
-  - id: "ollama_gemma"
-    model: "ollama:gemma3"
-    config:
-      base_url: "http://localhost:11434/v1"
+      temperature: 0.7
+      max_tokens: 50
+  - model: "test"
 
 defaultTest:
   assert:
-    - type: json_schema
+    - type: is_json
       value:
         type: object
         properties:
@@ -23,19 +23,28 @@ defaultTest:
         required: ["sentiment"]
 
 tests:
-  - id: "positive"
+  - description: "Extract positive sentiment"
     vars:
       text: "I love this product!"
-      expected_output: "positive"
-  - id: "negative"
+      expected_output: "positive"  # Non used for now
+    assert:
+      - type: contains
+        value: "positive"
+  - description: "Extract negative sentiment"
     vars:
       text: "This is terrible"
       expected_output: "negative"
-  - id: "neutral"
+    assert:
+      - type: contains
+        value: "negative"
+  - description: "Extract neutral sentiment"
     vars:
       text: "It's okay, nothing special"
       expected_output: "neutral"
-  - id: "error"
+    assert:
+      - type: contains
+        value: "neutral"
+  - description: "MUST fail because asserts positive sentiment"
     vars:
       text: "I absolutely hate this terrible product!"
     assert:
