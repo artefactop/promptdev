@@ -2,12 +2,12 @@ from pathlib import Path
 from typing import Any
 
 from promptdev.config.schemas import PromptDevConfig
-from promptdev.utils.file import read_file, resolve_file_path
+from promptdev.utils.file import read_yaml_file, resolve_file_path
 
 
 def load_config(config_path: Path) -> PromptDevConfig:
     """Load config"""
-    data = read_file(config_path)
+    data = read_yaml_file(config_path)
     data = _resolve_refs(data)
     data = _resolve_relative_paths(data, config_path.parent)
 

@@ -1,15 +1,14 @@
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # These models are a subset of the promptfoo schema
 # https://promptfoo.dev/config-schema.json
 
 
 class ProviderConfig(BaseModel):
-    id: str | None = Field(None, description="Unique identifier for the provider")
-    model: str
+    id: str = Field()
     config: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -48,3 +47,18 @@ class PromptDevConfig(BaseModel):
     tests: list[TestConfig | DatasetConfig] | None = None
     default_test: TestConfig | None = Field(None, alias="defaultTest")
     options: PromptDevConfigOptions = Field(PromptDevConfigOptions, alias="evaluateOptions")
+
+    @field_validator("providers", mode="before")
+    @classmethod
+    def convert_provider_shorthand(cls, v: list[str | dict[str, Any]]) -> list[dict[str, Any]]:
+        """
+        Converts string provider IDs (e.g., "ollama_gemma3_shorthand")
+        into ProviderConfig dictionary representations before Pydantic parsing.
+        """
+        processed_providers = []
+        for item in v:
+            if isinstance(item, str):
+                processed_providers.append({"id": item})
+            else:
+                processed_providers.append(item)
+        return processed_providers

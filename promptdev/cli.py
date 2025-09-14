@@ -10,6 +10,7 @@ from promptdev.core.cache import CacheManager
 from promptdev.core.engine import EvaluationEngine
 from promptdev.core.models import EvaluationContext
 from promptdev.utils.file import resolve_file_path
+from promptdev.utils.format import render_duration
 
 console = Console()
 
@@ -53,7 +54,7 @@ def eval(
             console.print(f"Description: {config.description or 'N/A'}")
             console.print(f"Providers: {len(config.providers)}")
             for provider in config.providers:
-                console.print(f"  {provider.id}: {provider.model}")
+                console.print(f"  {provider.id}")
 
         # Handle cache disable flag
         if no_cache:
@@ -80,7 +81,7 @@ def eval(
             reports.export_html(config_file.parent / f"{config_file.stem}_results.html")
             console.print(f"[green]Results exported to {config_file.stem}_results.html[/green]")
 
-        console.print(f"[green]Evaluation completed in {total_duration} seconds[/green]")
+        console.print(f"[green]Evaluation completed in {render_duration(total_duration)}[/green]")
 
     except Exception as e:
         console.print(f"[red]Error during evaluation: {e}[/red]")
@@ -117,7 +118,6 @@ def validate(config_file: Path, verbose: bool):
                     console.print(f"[yellow]Warning: Prompt file not found: {prompt_path}[/yellow]")
                 else:
                     console.print(f"✓ Prompt file exists: {prompt_path}")
-                    # TODO: validate prompt schema
 
         # Build context to check if everything is correct
         EvaluationContext.from_config(config)

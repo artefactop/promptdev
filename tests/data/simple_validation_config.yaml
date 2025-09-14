@@ -4,8 +4,10 @@ prompts:
   - file://./simple_prompt.yaml
 
 providers:
-  - id: "test_provider"
-    model: "promptdev:echo"
+  - id: promptdev:echo
+    config:
+      temperature: 0.0
+  - promptdev:echo
 
 tests:
   - description: "Simple validation test"

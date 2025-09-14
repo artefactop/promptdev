@@ -179,14 +179,14 @@ class ModelFactory:
     @staticmethod
     def build_model(provider_config: ProviderConfig) -> Model:
         """Create PydanticAI model from config"""
-        if provider_config.model.startswith("ollama:"):
-            actual_model_name = provider_config.model[7:]
+        if provider_config.id.startswith("ollama:"):
+            actual_model_name = provider_config.id[7:]
             base_url = provider_config.config.get("base_url")
             provider = OllamaProvider(base_url=base_url)
             return OpenAIChatModel(model_name=actual_model_name, provider=provider)
-        if provider_config.model == "promptdev:echo":
+        if provider_config.id == "promptdev:echo":
             return EchoModel()
-        return models.infer_model(provider_config.model)
+        return models.infer_model(provider_config.id)
 
     @staticmethod
     def build_model_settings(provider_config: ProviderConfig) -> ModelSettings:

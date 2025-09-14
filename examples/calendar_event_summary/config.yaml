@@ -6,13 +6,11 @@ prompts:
   - file://./prompt.yaml
 
 providers:
-  - id: "ollama_llama_3_2"
-    model: "ollama:llama3.2:3b-instruct-q8_0"
+  - id: "ollama:llama3.2:3b-instruct-q8_0"
     config:
       temperature: 0.0
       base_url: "http://localhost:11434/v1"
-  - id: "ollama_gemma3"
-    model: "ollama:gemma3"
+  - id: "ollama:gemma3"
     config:
       temperature: 0.0
       base_url: "http://localhost:11434/v1"

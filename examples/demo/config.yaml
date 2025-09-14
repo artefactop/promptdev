@@ -3,13 +3,12 @@ prompts:
   - "Extract the sentiment from: {text}"
 
 providers:
-  - id: "ollama_llama"
-    model: "ollama:llama3.2:3b-instruct-q8_0"
+  - id: "ollama:llama3.2:3b-instruct-q8_0"
     config:
       base_url: "http://localhost:11434/v1"
       temperature: 0.7
       max_tokens: 50
-  - model: "test"
+  - id: "test"
 
 defaultTest:
   assert:
