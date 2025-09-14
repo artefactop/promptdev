@@ -1109,7 +1109,6 @@ version = "0.0.2a1"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "httpx" },
     { name = "jsonschema" },
     { name = "pydantic" },
     { name = "pydantic-ai" },
@@ -1135,7 +1134,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.2.0" },
-    { name = "httpx", specifier = ">=0.28.0" },
     { name = "jsonschema", specifier = ">=4.25.1" },
     { name = "logfire", marker = "extra == 'logfire'", specifier = ">=4.4.0" },
     { name = "pydantic", specifier = ">=2.10.0" },
@@ -1873,11 +1871,11 @@ wheels = [
 
 [[package]]
 name = "types-protobuf"
-version = "6.30.2.20250822"
+version = "6.30.2.20250914"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/61/68/0c7144be5c6dc16538e79458839fc914ea494481c7e64566de4ecc0c3682/types_protobuf-6.30.2.20250822.tar.gz", hash = "sha256:faacbbe87bd8cba4472361c0bd86f49296bd36f7761e25d8ada4f64767c1bde9", size = 62379, upload-time = "2025-08-22T03:01:56.572Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/d1/e12dad323fe6e2455b768828de288f60d5160f41dad5d31af8ef92a6acbb/types_protobuf-6.30.2.20250914.tar.gz", hash = "sha256:c2105326d0a52de3d33b84af0010d834ebbd4c17c50ff261fa82551ab75d9559", size = 62424, upload-time = "2025-09-14T02:56:00.798Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/64/b926a6355993f712d7828772e42b9ae942f2d306d25072329805c374e729/types_protobuf-6.30.2.20250822-py3-none-any.whl", hash = "sha256:5584c39f7e36104b5f8bdfd31815fa1d5b7b3455a79ddddc097b62320f4b1841", size = 76523, upload-time = "2025-08-22T03:01:55.157Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/c4/3fcb1f8e03456a8a33a5dfb9f9788b0a91023e5fad6a37d46fc6831629a7/types_protobuf-6.30.2.20250914-py3-none-any.whl", hash = "sha256:cfc24977c0f38cf2896d918a59faed7650eb983be6070343a6204ac8ac0a297e", size = 76546, upload-time = "2025-09-14T02:55:59.489Z" },
 ]
 
 [[package]]

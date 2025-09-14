@@ -106,6 +106,10 @@ Promptdev uses YAML configuration files compatible with [Promptfoo](https://www.
 
 Promptdev maintains compatibility with promptfoo configurations to ease migration:
 
+> To migrate if you are using ids with format `provider:chat|completion:model`, just remove the middle part `provider:model`, promptdev only supports chat.
+>
+> Some provider name can change for example `togetherai` is now `togeher`. Refer to [pydantic_ai models](https://ai.pydantic.dev/models/overview/) for the full list.
+
 - **YAML configs** - Most promptfoo YAML configs work with minimal changes
 - **JSONL datasets** - Existing test datasets are fully supported
 - **Python assertions** - Custom `get_assert` functions work without modification

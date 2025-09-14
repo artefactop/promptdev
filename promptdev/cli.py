@@ -9,7 +9,6 @@ from promptdev.config.loader import load_config
 from promptdev.core.cache import CacheManager
 from promptdev.core.engine import EvaluationEngine
 from promptdev.core.models import EvaluationContext
-from promptdev.utils.file import resolve_file_path
 from promptdev.utils.format import render_duration
 
 console = Console()
@@ -105,22 +104,13 @@ def validate(config_file: Path, verbose: bool):
     """
     try:
         config = load_config(config_file)
+        # Build context to check if everything is correct
+        EvaluationContext.from_config(config)
+
         console.print("[green]✓ Configuration file is valid[/green]")
         console.print(f"Description: {config.description or 'N/A'}")
         console.print(f"Providers: {len(config.providers)}")
         console.print(f"Tests: {len(config.tests)}")
-
-        # Validate prompts exist
-        for prompt in config.prompts:
-            if isinstance(prompt, str) and prompt.startswith("file://"):
-                prompt_path = resolve_file_path(prompt)
-                if not prompt_path.exists():
-                    console.print(f"[yellow]Warning: Prompt file not found: {prompt_path}[/yellow]")
-                else:
-                    console.print(f"✓ Prompt file exists: {prompt_path}")
-
-        # Build context to check if everything is correct
-        EvaluationContext.from_config(config)
 
     except Exception as e:
         console.print(f"[red]✗ Configuration validation failed: {e}[/red]")

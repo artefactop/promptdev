@@ -24,7 +24,6 @@ dependencies = [
     "click>=8.2.0",
     "pyyaml>=6.0.2",
     "rich>=14.0.0",
-    "httpx>=0.28.0",
     "jsonschema>=4.25.1",
 ]
 

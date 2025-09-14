@@ -11,6 +11,22 @@ class ProviderConfig(BaseModel):
     id: str = Field()
     config: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("id", mode="before")
+    @classmethod
+    def convert_promptfoo_provider_format(cls, v: str) -> str:
+        """
+        Change provider id format to keep compatibility with promptfoo:
+        - Remove the middle part of the id `provider:chat|completion:model`
+        - Replace provider name
+        """
+        if "togetherai" in v:
+            v = v.replace("togetherai", "together")
+        if ":chat:" in v:
+            return v.replace("chat:", "")
+        if ":completion:" in v:
+            raise ValueError("promptdev does not support 'completions' only chat")
+        return v
+
 
 class AssertionConfig(BaseModel):
     type: str
