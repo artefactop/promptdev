@@ -1,6 +1,6 @@
 import asyncio
-from pathlib import Path
 import time
+from pathlib import Path
 
 import click
 from rich.console import Console

@@ -1,14 +1,14 @@
 import importlib.util
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, TypedDict
+from typing import Any, TypedDict
 
 import jsonschema
 from pydantic_core import from_json
 from pydantic_evals.evaluators import EvaluationReason, Evaluator, EvaluatorContext, EvaluatorOutput
 from pydantic_evals.evaluators.common import LLMJudge
-from pydantic_evals.evaluators.evaluator import EvaluationScalar
 
 
 @dataclass
