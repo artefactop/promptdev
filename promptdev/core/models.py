@@ -42,9 +42,9 @@ class EvaluationContext:
         # Build prompt templates
         prompt_templates = []
         for prompt in config.prompts:
-            prompt_path = Path(prompt)
-            if prompt_path.is_file():
-                template = PromptTemplate.from_file(prompt_path)
+            print(f"loading prompt: {prompt} ({type(prompt)})")
+            if isinstance(prompt, Path):
+                template = PromptTemplate.from_file(prompt)
             else:
                 # It's an inline template string
                 template = PromptTemplate.from_string(prompt)

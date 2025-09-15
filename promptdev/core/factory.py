@@ -17,7 +17,6 @@ from pydantic_evals.evaluators.common import (
 
 from promptdev.config.schemas import (
     AssertionConfig,
-    DatasetConfig,
     PromptDevConfig,
     ProviderConfig,
     TestConfig,
@@ -27,7 +26,7 @@ from promptdev.core.evaluators import (
     IsJSON,
     PythonAssertion,
 )
-from promptdev.utils.file import read_file, read_jsonl_file, resolve_file_path
+from promptdev.utils.file import read_file, read_jsonl_file
 from promptdev.utils.llm_models import EchoModel
 
 
@@ -57,11 +56,10 @@ class EvaluatorFactory:
             # Promptfoo's contains_json evaluator
             if isinstance(evaluator_value, dict):
                 return ContainsJSON(schema=evaluator_value, evaluation_name=evaluator_type)
-            if isinstance(evaluator_value, str):
+            if isinstance(evaluator_value, Path):
                 # Handle file reference to schema
                 try:
-                    schema_path = resolve_file_path(evaluator_value)
-                    schema = read_file(schema_path)
+                    schema = read_file(evaluator_value)
                     # TODO how to check if schema is a valid json schema
                     return ContainsJSON(schema=schema, evaluation_name=evaluator_type)
                 except Exception as e:
@@ -72,16 +70,12 @@ class EvaluatorFactory:
                 )
 
         elif evaluator_type == "python":
-            if isinstance(evaluator_value, str | Path):
-                if isinstance(evaluator_value, str):
-                    # Handle file:// URLs and resolve relative paths
-                    assertion_file = resolve_file_path(evaluator_value)
-                else:
-                    assertion_file = evaluator_value
-                if not assertion_file.exists():
-                    raise FileNotFoundError(f"Assertion file not found: {assertion_file}")
+            if isinstance(evaluator_value, Path):
+                # Does exits is check
+                # if not evaluator_value.exists():
+                #     raise FileNotFoundError(f"Assertion file not found: {evaluator_value}")
                 return PythonAssertion(
-                    assertion_file=str(assertion_file), evaluation_name=evaluator_type
+                    assertion_file=str(evaluator_value), evaluation_name=evaluator_type
                 )
             raise ValueError(
                 f"Python evaluator requires file path string, got: {type(evaluator_value)}"
@@ -147,6 +141,7 @@ class PromptTemplate:
     @classmethod
     def from_file(cls, prompt_path: Path) -> "PromptTemplate":
         """Load prompt from YAML file"""
+        # TODO allow multiple prompts in the same file
         with open(prompt_path, encoding="utf-8") as f:
             messages = yaml.safe_load(f)
 
@@ -215,7 +210,7 @@ class DatasetFactory:
             for test_config in config.tests:
                 if isinstance(test_config, TestConfig):
                     cases.append(DatasetFactory._build_cases_from_test_config(test_config))
-                elif isinstance(test_config, DatasetConfig):
+                elif isinstance(test_config, Path):
                     cases.extend(DatasetFactory._build_cases_from_dataset_config(test_config))
 
         if not cases:
@@ -241,18 +236,12 @@ class DatasetFactory:
         )
 
     @staticmethod
-    def _build_cases_from_dataset_config(dataset_config: DatasetConfig) -> list[Case]:
-        """Create a pydantic Dataset instance from a DatasetConfig."""
-        if dataset_config.file:
-            file_path = dataset_config.file
-            if isinstance(dataset_config.file, str):
-                file_path = resolve_file_path(file_path)
-            if not file_path.exists():
-                raise ValueError(f"File {file_path} does not exist")
-            if file_path.suffix == ".jsonl":
-                # Load from JSONL file
-                print("Reading JSONL file:", file_path)
-                return DatasetFactory._load_from_jsonl(file_path)
+    def _build_cases_from_dataset_config(dataset_config: Path) -> list[Case]:
+        """Create a pydantic Dataset instance from a Path."""
+        file_path = Path(dataset_config)
+        if file_path.suffix == ".jsonl":
+            # Load from JSONL file
+            return DatasetFactory._load_from_jsonl(file_path)
             # TODO support json and yaml formats too
         raise NotImplementedError("Only JSONL files are supported for now")
 

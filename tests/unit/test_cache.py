@@ -1,5 +1,3 @@
-"""Tests for the caching system."""
-
 import tempfile
 import time
 from pathlib import Path

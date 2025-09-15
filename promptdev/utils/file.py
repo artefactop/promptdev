@@ -6,46 +6,6 @@ import yaml
 from pydantic_core import from_json, to_json
 
 
-def resolve_file_path(path: str, base: Path | None = None) -> Path:
-    """Resolve a file path, handling file:// prefix and relative paths.
-
-    Args:
-        path: File path string, potentially with file:// prefix
-        base: Base directory for resolving relative paths (optional)
-
-    Returns:
-        Resolved Path object
-
-    Examples:
-        >>> resolve_file_path("file://./data.json", Path("/config"))
-        Path("/config/data.json")
-        >>> resolve_file_path("file:///abs/path.json")
-        Path("/abs/path.json")
-        >>> resolve_file_path("regular_path.json", Path("/base"))
-        Path("/base/regular_path.json")
-    """
-    if not isinstance(path, str):
-        raise TypeError(f"Expected string file path, got {type(path)}")
-
-    path_str = path
-
-    # Handle file:// prefix
-    if path_str.startswith("file://"):
-        path_str = path_str.removeprefix("file://")
-    path_obj = Path(path_str)
-
-    # If it's already absolute, return as-is
-    if path_obj.is_absolute():
-        return path_obj
-
-    # If we have a base path, resolve relative to it
-    if base is not None:
-        return base / path_obj
-
-    # Otherwise, return as relative path
-    return path_obj
-
-
 def read_text_file(file_path: Path) -> str:
     """Read a text file with UTF-8 encoding.
 

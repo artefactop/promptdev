@@ -2,6 +2,7 @@ description: "Simple validation test configuration"
 
 prompts:
   - file://./simple_prompt.yaml
+  - "{text}" #TODO support multiple prompts
 
 providers:
   - id: promptdev:echo
@@ -16,3 +17,4 @@ tests:
     assert:
       - type: contains
         value: "test"
+  - file://./simple_dataset.jsonl

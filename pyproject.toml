@@ -92,6 +92,13 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
+# Relax rules for test files
+[[tool.ty.overrides]]
+include = ["tests/**", "**/test_*.py"]
+
+[tool.ty.overrides.rules]
+possibly-unbound-attribute = "warn"
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

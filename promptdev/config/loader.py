@@ -2,64 +2,31 @@ from pathlib import Path
 from typing import Any
 
 from promptdev.config.schemas import PromptDevConfig
-from promptdev.utils.file import read_yaml_file, resolve_file_path
+from promptdev.utils.file import read_yaml_file
 
 
 def load_config(config_path: Path) -> PromptDevConfig:
     """Load config"""
     data = read_yaml_file(config_path)
     data = _resolve_refs(data)
-    data = _resolve_relative_paths(data, config_path.parent)
+    data = _resolve_file_urls(data, config_path.parent)
 
     return PromptDevConfig(**data)
 
 
-def _resolve_relative_paths(data: dict[str, Any], base_path: Path) -> dict[str, Any]:
-    """Resolve relative file paths in configuration relative to config file location."""
+def _resolve_file_urls(obj: Any, base: Path) -> Any:
+    """Recursively resolve file:// paths relative to a base directory and convert them to Path"""
+    if isinstance(obj, str) and obj.startswith("file://"):
+        rel_path = obj.removeprefix("file://")
+        return (base / rel_path).resolve()
 
-    def resolve_recursive(obj: Any) -> Any:
-        """Recursively resolve file paths in the data structure."""
-        if isinstance(obj, dict):
-            result = {}
-            for key, value in obj.items():
-                if key == "prompts" and isinstance(value, list):
-                    resolved_prompts = []
-                    for item in value:
-                        if isinstance(item, str) and item.startswith("file://"):
-                            item = item.removeprefix("file://")
-                            prompt_path = resolve_file_path(item, base_path)
-                            if not prompt_path.exists():
-                                raise FileNotFoundError(f"File not found: {prompt_path}")
-                            resolved_prompts.append(str(prompt_path))
-                        elif isinstance(item, str):
-                            resolved_prompts.append(item)
-                        else:
-                            raise ValueError(f"Invalid prompt: {item}")
-                    result[key] = resolved_prompts
-                elif key == "tests" and isinstance(value, list):
-                    # Resolve test dataset file paths
-                    resolved_tests = []
-                    for test in value:
-                        if isinstance(test, dict) and "file" in test:
-                            test_copy = dict(test)
-                            test_copy["file"] = str(resolve_file_path(test["file"], base_path))
-                            resolved_tests.append(test_copy)
-                        else:
-                            resolved_tests.append(resolve_recursive(test))
-                    result[key] = resolved_tests
-                elif key == "value" and isinstance(value, str) and value.startswith("file://"):
-                    resolved_value = resolve_file_path(value, base_path)
-                    if not resolved_value.exists():
-                        raise FileNotFoundError(f"File not found: {resolved_value}")
-                    result[key] = str(resolved_value)
-                else:
-                    result[key] = resolve_recursive(value)
-            return result
-        if isinstance(obj, list):
-            return [resolve_recursive(item) for item in obj]
-        return obj
+    if isinstance(obj, list):
+        return [_resolve_file_urls(x, base) for x in obj]
 
-    return resolve_recursive(data)
+    if isinstance(obj, dict):
+        return {k: _resolve_file_urls(v, base) for k, v in obj.items()}
+
+    return obj
 
 
 def _resolve_refs(data: dict[str, Any]) -> dict[str, Any]:
