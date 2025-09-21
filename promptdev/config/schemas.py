@@ -1,19 +1,7 @@
-from pathlib import Path
-from typing import Annotated, Any
+from typing import Any
 
-from pydantic import AfterValidator, BaseModel, Field, field_validator
-
-
-def must_exist_file(path: Path) -> Path:
-    if not path.exists():
-        raise ValueError(f"File does not exist: {path}")
-    if not path.is_file():
-        raise ValueError(f"Path is not a file: {path}")
-    return path.resolve()
-
-
-ExistingFilePath = Annotated[Path, AfterValidator(must_exist_file)]
-
+from pydantic import BaseModel, Field, field_validator
+from pydantic.types import FilePath
 
 # These models are a subset of the promptfoo schema
 # https://promptfoo.dev/config-schema.json
@@ -42,7 +30,7 @@ class ProviderConfig(BaseModel):
 
 class AssertionConfig(BaseModel):
     type: str
-    value: Any | None = None
+    value: FilePath | Any | None = None  # Using FilePath for python evaluator
     threshold: float | None = None
     # provider for llm-rubric, etc
 
@@ -50,7 +38,7 @@ class AssertionConfig(BaseModel):
 class TestConfig(BaseModel):
     description: str | None = None
     vars: dict[str, Any] | None = None  # TODO allow Path
-    assert_: list[AssertionConfig | ExistingFilePath] = Field(  # TODO rename to assertion
+    assert_: list[AssertionConfig | FilePath] = Field(  # TODO rename to assertion
         default_factory=list, alias="assert", description="AssertConfig or link to it"
     )
     metadata: dict[str, Any] | None = None
@@ -66,9 +54,9 @@ class PromptDevConfigOptions(BaseModel):
 
 class PromptDevConfig(BaseModel):
     description: str | None = None
-    prompts: list[str | ExistingFilePath] = Field()
+    prompts: list[str | FilePath]
     providers: list[ProviderConfig]
-    tests: list[TestConfig | ExistingFilePath] | ExistingFilePath | None = None
+    tests: list[TestConfig | FilePath] | FilePath | None = None
     default_test: TestConfig | None = Field(None, alias="defaultTest")
     options: PromptDevConfigOptions = Field(
         default_factory=PromptDevConfigOptions, alias="evaluateOptions"

@@ -67,6 +67,8 @@ select = [
     "RUF",  # ruff-specific rules
     "PT",   # flake8-pytest-style
     "RET",  # flake8-return
+    "T20",  # flake8-print
+    "TID",  # flake8-tidy-imports
     "TRY",  # tryceratops
     "PERF", # perflint
     "FURB", # refurb

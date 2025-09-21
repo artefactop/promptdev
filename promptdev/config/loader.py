@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Any
 
+from pydantic.types import FilePath
+
 from promptdev.config.schemas import PromptDevConfig
 from promptdev.utils.file import read_yaml_file
 
@@ -18,7 +20,7 @@ def _resolve_file_urls(obj: Any, base: Path) -> Any:
     """Recursively resolve file:// paths relative to a base directory and convert them to Path"""
     if isinstance(obj, str) and obj.startswith("file://"):
         rel_path = obj.removeprefix("file://")
-        return (base / rel_path).resolve()
+        return FilePath((base / rel_path).resolve())
 
     if isinstance(obj, list):
         return [_resolve_file_urls(x, base) for x in obj]

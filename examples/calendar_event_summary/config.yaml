@@ -30,7 +30,7 @@ defaultTest:
     #   threshold: 0.7
 
 tests:
-  - file: "file://./calendar_events_dataset.jsonl"
+  - "file://./calendar_events_dataset.jsonl"
 
 assertionTemplates:
   containsValidJSONSchema:

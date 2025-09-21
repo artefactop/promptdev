@@ -72,9 +72,10 @@ class TestCLIIntegration:
             # Copy test files to isolated filesystem
             shutil.copy(config_file, "validation.yaml")
             shutil.copy(test_data_dir / "simple_prompt.yaml", "simple_prompt.yaml")
+            shutil.copy(test_data_dir / "simple_dataset.jsonl", "simple_dataset.jsonl")
 
             result = runner.invoke(cli, ["validate", "validation.yaml"])
-            assert result.exit_code == 0
+            assert result.exit_code == 0, f"CLI failed with output: {result.output}"
             assert "valid" in result.output.lower() or "✓" in result.output
 
     def test_config_file_not_found(self, runner):

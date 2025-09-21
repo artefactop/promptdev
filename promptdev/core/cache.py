@@ -103,9 +103,8 @@ class SimpleCache:
 
             return valid_cache
 
-        except (OSError, ValueError, KeyError) as e:
+        except (OSError, ValueError, KeyError):
             # If cache file is corrupted, start fresh
-            print(f"Warning: Cache file corrupted, starting fresh: {e}")
             return {}
 
     def _save_cache(self, cache_data: dict[str, Any]) -> None:
@@ -128,8 +127,8 @@ class SimpleCache:
             # Atomic rename
             temp_file.replace(self.cache_file)
 
-        except OSError as e:
-            print(f"Warning: Could not save cache: {e}")
+        except OSError:
+            pass
 
     def get(self, cache_key: str) -> Any | None:
         """Get a value from the cache.
@@ -188,8 +187,8 @@ class SimpleCache:
         try:
             if self.cache_file.exists():
                 self.cache_file.unlink()
-        except OSError as e:
-            print(f"Warning: Could not clear cache: {e}")
+        except OSError:
+            pass
 
     def size(self) -> int:
         """Get the number of cached items."""

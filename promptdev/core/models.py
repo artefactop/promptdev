@@ -42,7 +42,6 @@ class EvaluationContext:
         # Build prompt templates
         prompt_templates = []
         for prompt in config.prompts:
-            print(f"loading prompt: {prompt} ({type(prompt)})")
             if isinstance(prompt, Path):
                 template = PromptTemplate.from_file(prompt)
             else:

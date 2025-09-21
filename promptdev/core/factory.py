@@ -71,9 +71,6 @@ class EvaluatorFactory:
 
         elif evaluator_type == "python":
             if isinstance(evaluator_value, Path):
-                # Does exits is check
-                # if not evaluator_value.exists():
-                #     raise FileNotFoundError(f"Assertion file not found: {evaluator_value}")
                 return PythonAssertion(
                     assertion_file=str(evaluator_value), evaluation_name=evaluator_type
                 )
@@ -262,7 +259,7 @@ class DatasetFactory:
             test_config = TestConfig(**data)
             if not test_config.description:
                 test_config.description = f"{file_path.name}:{line_num}"
-            test_cases = DatasetFactory._build_cases_from_test_config(test_config)
-            cases.append(test_cases)
+            test_case = DatasetFactory._build_cases_from_test_config(test_config)
+            cases.append(test_case)
 
         return cases
