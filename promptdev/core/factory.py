@@ -14,6 +14,7 @@ from pydantic_evals.evaluators.common import (
     IsInstance,
     MaxDuration,
 )
+from rich.console import Console
 
 from promptdev.config.schemas import (
     AssertionConfig,
@@ -28,6 +29,8 @@ from promptdev.core.evaluators import (
 )
 from promptdev.utils.file import read_file, read_jsonl_file
 from promptdev.utils.llm_models import EchoModel
+
+console = Console()
 
 
 class EvaluatorFactory:
@@ -46,21 +49,28 @@ class EvaluatorFactory:
 
         # Create appropriate pydantic_evals evaluator
         if evaluator_type == "is_json":
-            if isinstance(evaluator_value, dict):
+            if evaluator_value is None or isinstance(evaluator_value, dict):
                 return IsJSON(schema=evaluator_value, evaluation_name=evaluator_type)
-            raise ValueError(
-                f"JSON schema evaluator requires dict value, got: {type(evaluator_value)}"
-            )
+            if isinstance(evaluator_value, Path):
+                # Handle file reference to schema
+                try:
+                    schema = read_file(evaluator_value)
+                    return IsJSON(schema=schema, evaluation_name=evaluator_type)
+                except Exception as e:
+                    raise ValueError(f"Failed to load schema from file: {e}") from e
+            else:
+                raise ValueError(
+                    f"JSON schema evaluator requires dict or file path, got: {type(evaluator_value)}"
+                )
 
         if evaluator_type == "contains_json":
             # Promptfoo's contains_json evaluator
-            if isinstance(evaluator_value, dict):
+            if evaluator_value is None or isinstance(evaluator_value, dict):
                 return ContainsJSON(schema=evaluator_value, evaluation_name=evaluator_type)
             if isinstance(evaluator_value, Path):
                 # Handle file reference to schema
                 try:
                     schema = read_file(evaluator_value)
-                    # TODO how to check if schema is a valid json schema
                     return ContainsJSON(schema=schema, evaluation_name=evaluator_type)
                 except Exception as e:
                     raise ValueError(f"Failed to load schema from file: {e}") from e
@@ -70,12 +80,13 @@ class EvaluatorFactory:
                 )
 
         elif evaluator_type == "python":
+            console.log(
+                "Python evaluator executes arbitrary Python code. Use only if you trust the source code of the assertion file."
+            )
             if isinstance(evaluator_value, Path):
-                return PythonAssertion(
-                    assertion_file=str(evaluator_value), evaluation_name=evaluator_type
-                )
+                return PythonAssertion(assert_path=evaluator_value, evaluation_name=evaluator_type)
             raise ValueError(
-                f"Python evaluator requires file path string, got: {type(evaluator_value)}"
+                f"Python evaluator requires a Path to a file, got: {type(evaluator_value)}"
             )
 
         elif evaluator_type in ["llm_rubric", "llm_judge"]:
@@ -140,7 +151,7 @@ class PromptTemplate:
         """Load prompt from YAML file"""
         # TODO allow multiple prompts in the same file
         with open(prompt_path, encoding="utf-8") as f:
-            messages = yaml.safe_load(f)
+            messages = yaml.safe_load(f)  # TODO: Fix it, can return dict, list or None
 
         system_content = ""
         user_content = ""
@@ -204,12 +215,17 @@ class DatasetFactory:
 
         # Process test configurations
         if config.tests:
-            for test_config in config.tests:
-                if isinstance(test_config, TestConfig):
-                    cases.append(DatasetFactory._build_cases_from_test_config(test_config))
-                elif isinstance(test_config, Path):
-                    cases.extend(DatasetFactory._build_cases_from_dataset_config(test_config))
-
+            tests = config.tests
+            if isinstance(tests, Path):
+                cases.extend(DatasetFactory._build_cases_from_dataset_config(tests))
+            else:
+                for test_config in tests:
+                    if isinstance(test_config, TestConfig):
+                        cases.append(DatasetFactory._build_cases_from_test_config(test_config))
+                    elif isinstance(test_config, Path):
+                        cases.extend(DatasetFactory._build_cases_from_dataset_config(test_config))
+                    else:
+                        raise TypeError(f"Unsupported test config entry: {type(test_config)}")
         if not cases:
             raise ValueError("No test cases specified")
 
@@ -221,8 +237,20 @@ class DatasetFactory:
 
         evaluators = []
         for assertion_config in test_config.assert_:
-            evaluator = EvaluatorFactory.create_evaluator(assertion_config)
-            evaluators.append(evaluator)
+            if isinstance(assertion_config, Path):
+                loaded = read_file(assertion_config)
+                if isinstance(loaded, dict):
+                    assertion_objs = [AssertionConfig(**loaded)]
+                elif isinstance(loaded, list):
+                    assertion_objs = [AssertionConfig(**item) for item in loaded]
+                else:
+                    raise TypeError(f"Unsupported assertion file format: {type(loaded)}")
+            else:
+                assertion_objs = [assertion_config]
+
+            for ac in assertion_objs:
+                evaluator = EvaluatorFactory.create_evaluator(ac)
+                evaluators.append(evaluator)
 
         return Case(
             name=test_config.description or f"test_{uuid.uuid4().hex[:8]}",

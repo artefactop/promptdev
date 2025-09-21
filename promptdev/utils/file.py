@@ -77,7 +77,7 @@ def read_json_file(file_path: Path) -> Any:
         raise ValueError(f"Invalid JSON syntax in {file_path}: {e}") from e
 
 
-def read_jsonl_file(file_path: Path) -> Generator[dict[str, Any], None, None]:
+def read_jsonl_file(file_path: Path) -> Generator[dict[str, Any]]:
     """Read and parse a JSONL file line by line.
 
     Args:

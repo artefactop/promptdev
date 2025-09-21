@@ -110,7 +110,6 @@ def validate(config_file: Path, verbose: bool):
         console.print("[green]✓ Configuration file is valid[/green]")
         console.print(f"Description: {config.description or 'N/A'}")
         console.print(f"Providers: {len(config.providers)}")
-        console.print(f"Tests: {len(config.tests)}")
 
     except Exception as e:
         console.print(f"[red]✗ Configuration validation failed: {e}[/red]")

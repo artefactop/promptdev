@@ -18,7 +18,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "pydantic-ai==1.0.6",
+    "pydantic-ai~=1.0",
     "pydantic-evals",
     "pydantic>=2.10.0",
     "click>=8.2.0",
@@ -48,7 +48,7 @@ build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py313"
 extend-exclude = ["__pycache__", ".venv", "build", "dist"]
 
 [tool.ruff.lint]

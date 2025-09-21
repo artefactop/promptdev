@@ -42,11 +42,14 @@ class EvaluationContext:
         # Build prompt templates
         prompt_templates = []
         for prompt in config.prompts:
-            if isinstance(prompt, Path):
+            if isinstance(prompt, Path) and prompt.suffix in [".yaml", ".yml"]:
                 template = PromptTemplate.from_file(prompt)
-            else:
-                # It's an inline template string
+            elif isinstance(prompt, Path) and prompt.suffix in [".txt"]:
+                template = PromptTemplate.from_string(prompt.read_text())
+            elif isinstance(prompt, str):
                 template = PromptTemplate.from_string(prompt)
+            else:
+                raise ValueError(f"Invalid prompt type: {type(prompt)}")
             prompt_templates.append(template)
 
         # Build providers

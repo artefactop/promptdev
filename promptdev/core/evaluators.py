@@ -15,7 +15,7 @@ from pydantic_evals.evaluators.common import LLMJudge
 class IsJSON(Evaluator[str, Any]):
     """Evaluator that checks if a string is valid JSON and optionally validates against a schema."""
 
-    schema: dict[str, Any]
+    schema: dict[str, Any] | None = None
     evaluation_name: str = "is_json"
 
     def evaluate(self, ctx: EvaluatorContext[str, Any]) -> EvaluationReason:
@@ -69,7 +69,7 @@ class PythonAssertion(Evaluator[str, Any]):
         },
     )
 
-    assertion_file: str
+    assert_path: Path
     evaluation_name: str = "python"
     assert_function: (
         Callable[[str, FunctionContext], bool | float | FunctionResponseDict] | None
@@ -81,41 +81,29 @@ class PythonAssertion(Evaluator[str, Any]):
 
     def _load_assertion_function(self):
         """Load get_assert function from Python file."""
-        assert_path = Path(self.assertion_file)
-        if not assert_path.exists():
-            # Show more context about where we're looking and what paths might be expected
-            current_dir = Path.cwd()
-            relative_path = (
-                assert_path.relative_to(current_dir)
-                if current_dir in assert_path.parents
-                else assert_path
-            )
-            raise FileNotFoundError(
-                f"Assertion file not found: {assert_path}\n"
-                f"Current directory: {current_dir}\n"
-                f"Looking for: {relative_path}\n"
-                f"Absolute path: {assert_path.absolute()}\n"
-                f"Parent directory exists: {assert_path.parent.exists()}"
-            )
+        if not isinstance(self.assert_path, Path):
+            raise TypeError(f"Assertion path must be a Path object, got: {type(self.assert_path)}")
 
         try:
             # Load module dynamically
-            spec = importlib.util.spec_from_file_location("custom_assert", assert_path)
+            spec = importlib.util.spec_from_file_location("custom_assert", self.assert_path)
             if spec is None:
-                raise ImportError(f"Could not create module spec for {assert_path}")
+                raise ImportError(f"Could not create module spec for {self.assert_path}")
 
             module = importlib.util.module_from_spec(spec)
             if spec.loader is None:
-                raise ImportError(f"Module spec has no loader for {assert_path}")
+                raise ImportError(f"Module spec has no loader for {self.assert_path}")
 
             spec.loader.exec_module(module)
         except Exception as e:
-            raise ImportError(f"Failed to load assertion module from {assert_path}: {e}") from e
+            raise ImportError(
+                f"Failed to load assertion module from {self.assert_path}: {e}"
+            ) from e
 
         if not hasattr(module, "get_assert"):
             available_functions = [name for name in dir(module) if not name.startswith("_")]
             raise ValueError(
-                f"Assertion file must define 'get_assert' function: {assert_path}\n"
+                f"Assertion file must define 'get_assert' function: {self.assert_path}\n"
                 f"Available functions in module: {available_functions}"
             )
 
@@ -165,7 +153,7 @@ class PythonAssertion(Evaluator[str, Any]):
 class ContainsJSON(Evaluator[str, Any]):
     """Evaluator that checks if the output contains a valid JSON and optionally validates against a schema."""
 
-    schema: dict[str, Any]
+    schema: dict[str, Any] | None = None
     evaluation_name: str = "contains_json"
 
     def evaluate(self, ctx: EvaluatorContext[str, Any]) -> EvaluationReason:
@@ -226,7 +214,7 @@ class GEval(Evaluator[str, Any]):
         """
         # Create a G-Eval style rubric
         g_eval_rubric = f"""
-You are an expert evaluator. Please evaluate the following output based on this criteria: {self.criteria}
+You are an expert evaluator. Please evaluate the following output based on this criteria: {self.rubric}
 
 Rate the output on a scale from 1 to 5, where:
 1 = Very Poor
