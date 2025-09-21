@@ -80,6 +80,10 @@ def eval(
             reports.export_html(config_file.parent / f"{config_file.stem}_results.html")
             console.print(f"[green]Results exported to {config_file.stem}_results.html[/green]")
 
+        if runner.cache is not None:
+            # TODO: show cache hits and misses
+            console.print("[blue]Some results were cached[/blue]")
+
         console.print(f"[green]Evaluation completed in {render_duration(total_duration)}[/green]")
 
     except Exception as e:

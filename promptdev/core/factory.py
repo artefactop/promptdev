@@ -80,8 +80,9 @@ class EvaluatorFactory:
                 )
 
         elif evaluator_type == "python":
-            console.log(
-                "Python evaluator executes arbitrary Python code. Use only if you trust the source code of the assertion file."
+            console.print(
+                "Python evaluator executes arbitrary Python code. Use only if you trust the source code of the assertion file.",
+                style="yellow",
             )
             if isinstance(evaluator_value, Path):
                 return PythonAssertion(assert_path=evaluator_value, evaluation_name=evaluator_type)

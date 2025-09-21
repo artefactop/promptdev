@@ -11,7 +11,7 @@ from promptdev.core.reporting import EvaluationReport, EvaluationReports
 class EvaluationEngine:
     def __init__(self, context: EvaluationContext):
         self.context = context
-        self.cache = CacheManager()
+        self.cache = CacheManager().cache if context.config.options.cache_enabled else None
 
     async def run_evaluation(self) -> EvaluationReports:
         """Run evaluation with pre-built context"""
@@ -40,9 +40,19 @@ class EvaluationEngine:
                 model_settings=built_provider.model_settings,  # Pre-built
                 output_type=str,
             )
-            # TODO: add cache
-            # return await self._run_with_cache(agent, user_prompt, built_provider, inputs)
+            if self.cache is not None:
+                cache_key = self.cache.generate_cache_key(
+                    built_provider.model.model_name, system_prompt, inputs, built_provider.config
+                )
+                agent_run_result_output = self.cache.get(cache_key)  # TODO: use async
+                if agent_run_result_output is not None:
+                    # TODO: mark as cached
+                    return agent_run_result_output
+
             agent_run_result = await agent.run(user_prompt)
+
+            if self.cache is not None:
+                self.cache.set(cache_key, agent_run_result.output)  # TODO: use async
             return agent_run_result.output
 
         # Use pre-built dataset

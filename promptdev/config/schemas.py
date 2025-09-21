@@ -48,7 +48,7 @@ class TestConfig(BaseModel):
 
 class PromptDevConfigOptions(BaseModel):
     cache_enabled: bool = Field(
-        default=False, alias="cache", description="Whether or not to cache the results"
+        default=True, alias="cache", description="Whether or not to cache the results"
     )
 
 
