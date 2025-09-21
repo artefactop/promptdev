@@ -3,7 +3,8 @@ def render_duration(seconds: float) -> str:
 
     If the duration is less than 1 millisecond, show microseconds.
     If it's less than one second, show milliseconds.
-    Otherwise, show seconds.
+    If it's less than one minute, show seconds.
+    Otherwise, show minutes and seconds.
     """
     if seconds == 0:
         return "0s"
@@ -19,5 +20,9 @@ def render_duration(seconds: float) -> str:
     elif abs_seconds < 60:
         value = seconds
         unit = "s"
+    else:
+        minutes = int(seconds / 60)
+        sec = int(seconds % 60)
+        return f"{minutes}m{sec}s"
 
     return f"{value:,.{precision}f}{unit}"
