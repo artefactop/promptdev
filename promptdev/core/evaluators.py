@@ -233,6 +233,9 @@ Consider the criteria carefully and provide your assessment.
 
             judge = LLMJudge(**judge_kwargs)
             score = judge.evaluate(ctx)
+            if isinstance(score, dict):
+                score = next(iter(score.values()))
+                score = getattr(score, "value", score)
 
             # G-Eval typically returns scores 1-5, normalize to 0-1
             return EvaluationReason(

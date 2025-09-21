@@ -52,6 +52,9 @@ class EvaluationContext:
                 raise ValueError(f"Invalid prompt type: {type(prompt)}")
             prompt_templates.append(template)
 
+        if not prompt_templates:
+            raise ValueError("No prompts specified in configuration")
+
         # Build providers
         built_providers = []
         for provider_config in config.providers:
