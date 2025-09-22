@@ -95,10 +95,9 @@ class EvaluationReports:
         """Get status text with appropriate color for a pass rate."""
         if pass_rate == FULL_PASS_THRESHOLD:
             return Text("PASS", style="green")
-        elif pass_rate >= PARTIAL_PASS_THRESHOLD:
+        if pass_rate >= PARTIAL_PASS_THRESHOLD:
             return Text("PARTIAL", style="yellow")
-        else:
-            return Text("FAIL", style="red")
+        return Text("FAIL", style="red")
 
     def _extract_short_reason(self, reason: str) -> str:
         """Extract a short, readable reason from an evaluation result reason."""
@@ -116,7 +115,7 @@ class EvaluationReports:
 
     def _get_case_summary(self, case: ReportCase) -> CaseSummary:
         """Extract summary info from a case using pydantic_evals ReportCase structure."""
-        has_failure, avg_score, passed_count, total_count = self._analyze_case_results(case)
+        _has_failure, avg_score, passed_count, total_count = self._analyze_case_results(case)
 
         pass_rate = passed_count / total_count if total_count > 0 else 0.0
 
@@ -247,8 +246,6 @@ class EvaluationReports:
         if not failed_by_provider:
             return
 
-
-
         total_failures = sum(len(cases) for _, cases in failed_by_provider)
 
         console.print(Rule("Failed Tests Analysis", style="red"))
@@ -343,7 +340,9 @@ class EvaluationReports:
                 console.print()
 
                 # Failed evaluations section - distinguish between scores and assertions
-                has_failed_scores = any(result.value < DEFAULT_PASS_THRESHOLD for result in case.scores.values())
+                has_failed_scores = any(
+                    result.value < DEFAULT_PASS_THRESHOLD for result in case.scores.values()
+                )
                 has_failed_assertions = any(not result.value for result in case.assertions.values())
 
                 if has_failed_scores:
@@ -383,9 +382,7 @@ class EvaluationReports:
 
         console.print()
 
-    def _print_reports(
-        self, console: Console, verbose: bool = False
-    ):
+    def _print_reports(self, console: Console, verbose: bool = False):
         if verbose:
             # Use the detailed original format
             console.print(Rule("Detailed Evaluation Reports"))
