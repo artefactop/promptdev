@@ -95,9 +95,7 @@ def get_assert(output: str, context: dict) -> bool | float | dict[str, Any]:
         score = passed_checks / total_checks
         return {
             "score": score,
-            "reason": f"Field validation results: {len(results)} failed checks"
-            if results
-            else "All fields match",
+            "reason": str(results) if results else "All fields match",
         }
 
     except (json.JSONDecodeError, KeyError, AttributeError) as e:

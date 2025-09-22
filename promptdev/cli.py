@@ -72,7 +72,7 @@ def eval(
 
         # Output results
         if output == "console":
-            reports.print()
+            reports.print(verbose=verbose)
         elif output == "json":
             reports.export_json(config_file.parent / f"{config_file.stem}_results.json")
             console.print(f"[green]Results exported to {config_file.stem}_results.json[/green]")
@@ -82,7 +82,7 @@ def eval(
 
         if runner.cache is not None:
             # TODO: show cache hits and misses
-            console.print("[blue]Some results were cached[/blue]")
+            console.print("[blue]Cache was enabled[/blue]")
 
         console.print(f"[green]Evaluation completed in {render_duration(total_duration)}[/green]")
 
@@ -109,7 +109,7 @@ def validate(config_file: Path, verbose: bool):
     try:
         config = load_config(config_file)
         # Build context to check if everything is correct
-        EvaluationContext.from_config(config)
+        _ = EvaluationContext.from_config(config)
 
         console.print("[green]✓ Configuration file is valid[/green]")
         console.print(f"Description: {config.description or 'N/A'}")
