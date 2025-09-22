@@ -49,38 +49,29 @@ class EvaluationReports:
 
     def _analyze_case_results(self, case: ReportCase) -> tuple[bool, float, int, int]:
         """Analyze case results and return (has_failure, avg_score, passed_count, total_count)."""
-        score_values = []
-        assertion_passed = 0
-        assertion_total = 0
         has_failure = False
-
-        # Process scores
+        score_values: list[float] = []
+        scores_passed = 0
+        # Scores (numeric)
         for result in case.scores.values():
-            score_value = float(result.value)
-            score_values.append(score_value)
-            if score_value < DEFAULT_PASS_THRESHOLD:
-                has_failure = True
-
-        # Process assertions
-        for result in case.assertions.values():
-            assertion_total += 1
-            if result.value:
-                assertion_passed += 1
-                score_values.append(1.0)
+            try:
+                v = float(result.value)
+            except (TypeError, ValueError):
+                continue
+            score_values.append(v)
+            if v >= DEFAULT_PASS_THRESHOLD:
+                scores_passed += 1
             else:
-                score_values.append(0.0)
                 has_failure = True
-
-        # Calculate metrics
-        avg_score = sum(score_values) / len(score_values) if score_values else 0.0
-
-        if assertion_total > 0:
-            passed_count = assertion_passed
-            total_count = assertion_total
-        else:
-            passed_count = sum(1 for score in score_values if score >= DEFAULT_PASS_THRESHOLD)
-            total_count = len(score_values)
-
+        # Assertions (boolean)
+        assertion_total = len(case.assertions)
+        assertion_passed = sum(1 for r in case.assertions.values() if bool(r.value))
+        if assertion_passed < assertion_total:
+            has_failure = True
+        # Metrics
+        avg_score = (sum(score_values) / len(score_values)) if score_values else 0.0
+        passed_count = scores_passed + assertion_passed
+        total_count = len(score_values) + assertion_total
         return has_failure, avg_score, passed_count, total_count
 
     def _get_color_for_score(self, score: float) -> str:
@@ -140,7 +131,7 @@ class EvaluationReports:
         summary_table.add_column("Model", style="dim")
         summary_table.add_column("Pass Rate", justify="center")
         summary_table.add_column("Avg Score", justify="center")
-        summary_table.add_column("Assertions", justify="center")
+        summary_table.add_column("Checks", justify="center")
         summary_table.add_column("Avg Duration", justify="center")
 
         for report in self.evaluation_reports:
@@ -189,7 +180,7 @@ class EvaluationReports:
             results_table.add_column("Test Case", style="dim", width=25)
             results_table.add_column("Status", justify="center", width=12)
             results_table.add_column("Score", justify="center", width=10)
-            results_table.add_column("Assertions", justify="center", width=12)
+            results_table.add_column("Checks", justify="center", width=12)
 
             results_table.add_column("Duration", justify="right", width=10)
 
