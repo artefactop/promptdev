@@ -1,0 +1,20 @@
+description: "Simple validation test configuration"
+
+prompts:
+  - file://./simple_prompt.yaml
+  - "{text}" #TODO support multiple prompts
+
+providers:
+  - id: promptdev:echo
+    config:
+      temperature: 0.0
+  - promptdev:echo
+
+tests:
+  - description: "Simple validation test"
+    vars:
+      text: "test"
+    assert:
+      - type: contains
+        value: "test"
+  - file://./simple_dataset.jsonl

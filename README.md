@@ -1,4 +1,4 @@
-# PromptDev
+# Promptdev
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
@@ -10,7 +10,7 @@
 
 `promptdev` is a prompt evaluation framework that provides comprehensive testing for AI agents across multiple providers.
 
-![PromptDev Demo](https://github.com/artefactop/promptdev/raw/main/docs/demo.gif)
+![Promptdev Demo](https://github.com/artefactop/promptdev/raw/main/docs/demo.gif)
 
 > [!WARNING]
 >
@@ -63,9 +63,6 @@ promptdev eval examples/demo/config.yaml
 # Run evaluation (advanced example)
 promptdev eval examples/calendar_event_summary/config.yaml
 
-# Override provider  
-promptdev eval examples/demo/config.yaml --provider pydantic-ai:openai
-
 # Disable caching for a run
 promptdev eval examples/demo/config.yaml --no-cache
 
@@ -88,160 +85,52 @@ uv run promptdev --help
 
 ## Assertion Types
 
-PromptDev supports a comprehensive set of evaluators for different testing scenarios:
+Promptdev supports a comprehensive set of evaluators for different testing scenarios:
 
-| Type                            | Status             | Description                                | Example Usage                                  |
-| ------------------------------- | ------------------ | ------------------------------------------ | ---------------------------------------------- |
-| **Core PydanticAI Evaluators**  |
-| `exact`                         | ✅                  | Exact string/value matching                | `type: exact`                                  |
-| `is_instance`                   | ✅                  | Type checking                              | `type: is_instance, value: "str"`              |
-| `llm_judge`                     | ✅                  | LLM-based semantic evaluation              | `type: llm_judge, rubric: "Evaluate accuracy"` |
-| **PromptDev Custom Evaluators** |
-| `json_schema`                   | ✅                  | JSON schema validation                     | `type: json_schema, value: {schema}`           |
-| `python`                        | ✅                  | Custom Python assertions                   | `type: python, value: "./assert.py"`           |
-| `contains`                      | ✅                  | Substring matching                         | `type: contains, value: "expected text"`       |
-| **Promptfoo Compatibility**     |
-| `contains-json`                 | ✅ **(Deprecated)** | JSON schema validation (use `json_schema`) | `type: contains-json, value: {schema}`         |
-| `llm-rubric`                    | ✅ **(Deprecated)** | LLM evaluation (use `llm_judge`)           | `type: llm-rubric, value: "rubric text"`       |
-| `g-eval`                        | ✅ **(Deprecated)** | G-Eval methodology (use `llm_judge`)       | `type: g-eval, value: "criteria"`              |
+| Type            | Description                                                                                                                                                                         |
+|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `equals`        | Checks if the output exactly equals the provided value                                                                                                                              |
+| `contains`      | Checks if the output contains the expected output                                                                                                                                   |
+| `is_instance`   | Checks if the output is an instance of a type with the given name                                                                                                                   |
+| `max_duration`  | Checks if the execution time is under the specified maximum                                                                                                                         |
+| `is_json`       | Checks if the output is a valid JSON string (optional json schema validation)                                                                                                       |
+| `contains_json` | Checks if the output contains a valid json (optional json schema validation)                                                                                                        |
+| `python`        | [Promptfoo compatible](https://www.promptfoo.dev/docs/configuration/expected-outputs/python/#external-py) Allows you to provide a custom Python function to validate the LLM output |
+
+
+## Configuration
+
+Promptdev uses YAML configuration files compatible with [Promptfoo](https://www.promptfoo.dev/docs/configuration/reference/) format, but only a subset is available for now:
 
 ### Promptfoo Compatibility
 
-PromptDev maintains compatibility with promptfoo configurations to ease migration:
+Promptdev maintains compatibility with promptfoo configurations to ease migration:
+
+> To migrate if you are using ids with format `provider:chat|completion:model`, just remove the middle part `provider:model`, promptdev only supports chat.
+>
+> Some provider name can change for example `togetherai` is now `togeher`. Refer to [pydantic_ai models](https://ai.pydantic.dev/models/overview/) for the full list.
 
 - **YAML configs** - Most promptfoo YAML configs work with minimal changes
 - **JSONL datasets** - Existing test datasets are fully supported
 - **Python assertions** - Custom `get_assert` functions work without modification
 - **JSON schemas** - Schema validation uses the same format
 
-**Migration Notes:**
-- Use `json_schema` instead of `contains-json` for new projects
-- Use `llm_judge` instead of `llm-rubric` or `g-eval` for better performance
-- Provider IDs use `pydantic-ai:` prefix (e.g., `pydantic-ai:openai`)
-- Model names follow PydanticAI format (e.g., `openai:gpt-4`)
+> [!WARNING]
+> Promptdev can run custom Python assertions. While powerful, 
+> running arbitrary Python code always comes with [security issues](https://github.com/pydantic/pydantic-ai/pull/2808).
+> Use this feature only with code you trust.
 
-## Configuration
-
-PromptDev uses YAML configuration files compatible with promptfoo format:
-
-```yaml
-description: "Calendar event summary evaluation"
-
-prompts:
-  - file://./prompt.yaml
-
-providers:
-  - id: "pydantic-ai:openai"
-    model: "openai:gpt-4"
-    config:
-      temperature: 0.0
-  - id: "pydantic-ai:ollama"
-    model: "ollama:llama3.2:3b"
-
-tests:
-  - file: "./calendar_events_dataset.jsonl"
-
-defaultTest:
-  assert:
-    - type: "json_schema"
-      value:
-        type: "object"
-        required: ["name", "event_type", "out_of_office"]
-        properties:
-          name: {type: "string"}
-          event_type: {type: "string"}
-          out_of_office: {type: "boolean"}
-    - type: "python" 
-      value: "./assert.py"
-    - type: "llm_judge"
-      rubric: "Evaluate if the output correctly extracts calendar event information"
-      model: "openai:gpt-4"
-```
-
-## Advanced Features
-
-### PydanticAI Evals Integration
-
-PromptDev leverages [PydanticAI's pydantic_evals system](https://ai.pydantic.dev/evals/) for robust, type-safe evaluations:
-
-- **LLMJudge Evaluator**: Advanced semantic evaluation using LLMs with customizable rubrics
-- **Type-safe Evaluation**: Built on Pydantic's validation framework for reliable results
-- **Schema Resolution**: Comprehensive `$ref` resolution for assertion templates and schemas
-- **Error Collection**: Structured error reporting with detailed context and stack traces
-
-### Custom Python Assertions
-
-Create powerful custom evaluators:
+Example of a Python assertion:
 
 ```python
-# examples/calendar_event_summary/assert.py
-def get_assert():
-    def assert_expected(output, context):
-        import json
-        
-        try:
-            # Parse JSON from LLM output
-            data = json.loads(output)
-            
-            # Get expected values from test variables
-            expected_name = context['vars']['expected_name']
-            expected_event_type = context['vars']['expected_event_type']
-            
-            # Detailed field-by-field validation
-            details = []
-            score = 0
-            total_fields = 2
-            
-            # Validate name
-            if data.get('name') == expected_name:
-                details.append({'field': 'Name', 'actual': data.get('name'), 'expected': expected_name, 'passed': True})
-                score += 1
-            else:
-                details.append({'field': 'Name', 'actual': data.get('name'), 'expected': expected_name, 'passed': False})
-            
-            # Validate event type
-            if data.get('event_type', '').lower() == expected_event_type.lower():
-                details.append({'field': 'Event Type', 'actual': data.get('event_type'), 'expected': expected_event_type, 'passed': True})
-                score += 1
-            else:
-                details.append({'field': 'Event Type', 'actual': data.get('event_type'), 'expected': expected_event_type, 'passed': False})
-            
-            return {
-                'pass': score == total_fields,
-                'score': score / total_fields,
-                'reason': f'Field validation results: {total_fields - score} failed checks' if score < total_fields else 'All fields validated successfully',
-                'details': details
-            }
-            
-        except Exception as e:
-            return {
-                'pass': False,
-                'score': 0.0,
-                'reason': f'JSON parsing failed: {str(e)}',
-                'details': []
-            }
-    
-    return assert_expected
+# tests/data/python_assert.py
+from typing import Any
+
+
+def get_assert(output:str, context:dict) -> bool | float | dict[str, Any]:
+        """Test assertion that checks if output contains 'success'."""
+        return "success" in str(output).lower()
 ```
-
-### Caching System
-
-PromptDev includes a high-performance file-based cache:
-
-- **Automatic Caching**: Caches agent outputs based on model, prompt, and inputs
-- **TTL Support**: Configurable time-to-live for cache entries
-- **Thread-Safe**: Concurrent evaluation support with atomic file operations
-- **Cache Management**: CLI commands for stats and cleanup
-
-### Rich Reporting
-
-Comprehensive evaluation reports include:
-
-- **Provider Comparison**: Side-by-side performance across multiple providers
-- **Detailed Failure Analysis**: Field-level breakdowns for failed assertions
-- **Hierarchical Test Display**: Tree view of failures organized by provider
-- **Performance Metrics**: Pass rates, scores, and timing information
-- **Error Summary**: Collected evaluation errors with full context
 
 ## Development
 
@@ -253,7 +142,7 @@ uv sync
 uv run pytest
 
 # Format and lint code
-uv run ruff check .
+uv run ruff check . --fix
 uv run ruff format .
 
 # Type checking
@@ -269,16 +158,15 @@ uv run ty check
 - [x] File-based caching system with TTL support
 - [x] Rich console reporting with failure analysis
 - [x] Simple file disk cache
-- [ ] Better integration with PydanticAI, do not reinvent the wheel
-- [ ] Concurrent execution using PydanticAI natively, for faster large-scale evaluations
-- [ ] Native support for PydanticAI agents
-- [ ] Testing
+- [x] Better integration with PydanticAI, do not reinvent the wheel
+- [x] Concurrent execution using PydanticAI natively, for faster large-scale evaluations
 - [ ] Code cleanup
+- [ ] Testing
 - [ ] Testing promptfoo files
-- [ ] Add support to run multiple test_cases
+- [ ] Native support for PydanticAI agents
+- [ ] Add support to run multiple config files with one command
 - [ ] CI/CD integration helpers with change detection
-- [ ] Red team security testing capabilities
-- [ ] Turso persistence for evaluation history and analytics
+- [ ] SQLite persistence for evaluation history and analytics
 - [ ] Performance benchmarking and regression detection
 
 ## Contributing
@@ -303,7 +191,7 @@ We use `ruff` for code formatting and linting, `ty` for type checking, and `pyte
 uv run ruff check .       # Lint code
 uv run ruff format .      # Format code
 uv run ty check           # Type checking
-uv run pytest            # Run tests
+uv run pytest             # Run tests
 ```
 
 ## License

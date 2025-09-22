@@ -1,6 +1,6 @@
 [project]
 name = "promptdev"
-version = "0.0.1"
+version = "0.0.2a1"
 description = "Python-native prompt evaluation tool using PydanticAI"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -18,26 +18,26 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "pydantic-ai==1.0.0b1",
+    "pydantic-ai~=1.0",
     "pydantic-evals",
     "pydantic>=2.10.0",
     "click>=8.2.0",
     "pyyaml>=6.0.2",
     "rich>=14.0.0",
-    "httpx>=0.28.0",
-    "jinja2>=3.1.6",
+    "jsonschema>=4.25.1",
 ]
 
 [project.optional-dependencies]
+logfire = ["logfire>=4.4.0"]
+
+[dependency-groups]
 dev = [
     "pytest>=8.4.0",
     "pytest-asyncio>=0.25.0",
     "pytest-cov>=6.0.0",
     "ruff>=0.12.12",
     "ty",
-    "safety>=3.2.0",
 ]
-logfire = ["logfire>=4.4.0"]
 
 [project.scripts]
 promptdev = "promptdev.cli:cli"
@@ -67,6 +67,8 @@ select = [
     "RUF",  # ruff-specific rules
     "PT",   # flake8-pytest-style
     "RET",  # flake8-return
+    "T20",  # flake8-print
+    "TID",  # flake8-tidy-imports
     "TRY",  # tryceratops
     "PERF", # perflint
     "FURB", # refurb
@@ -92,6 +94,13 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
+# Relax rules for test files
+[[tool.ty.overrides]]
+include = ["tests/**", "**/test_*.py"]
+
+[tool.ty.overrides.rules]
+possibly-unbound-attribute = "warn"
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
@@ -99,6 +108,7 @@ addopts = ["--strict-markers", "--strict-config", "--tb=short"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
+    "requires_api: marks tests as requiring API access",
 ]
 
 [tool.coverage.run]

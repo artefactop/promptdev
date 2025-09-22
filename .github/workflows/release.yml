@@ -106,7 +106,7 @@ jobs:
           
           # Create release notes (customize as needed)
           cat > release_notes.md << EOF
-          ## PromptDev v$VERSION
+          ## Promptdev v$VERSION
           
           ### Features
           - Modern Python 3.12+ prompt evaluation framework
@@ -134,6 +134,6 @@ jobs:
           files: dist/*
           body_path: release_notes.md
           tag_name: ${{ github.ref_name }}
-          name: PromptDev ${{ steps.extract-release-notes.outputs.version }}
+          name: Promptdev ${{ steps.extract-release-notes.outputs.version }}
           draft: false
           prerelease: false

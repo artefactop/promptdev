@@ -1,0 +1,2 @@
+{"vars":{"text":"jsonl_dataset"}, "assert":[{"type":"equals", "value":"jsonl_dataset"}]}
+{"vars":{"text":"jsonl_dataset"}, "assert":[{"type":"contains", "value":"jsonl_dataset"}]}

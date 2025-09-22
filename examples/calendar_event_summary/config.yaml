@@ -1,4 +1,4 @@
-# PromptDev configuration with full promptfoo compatibility
+# Promptdev configuration with full promptfoo compatibility
 
 description: "Calendar event summary evaluation - promptfoo compatible"
 
@@ -6,13 +6,11 @@ prompts:
   - file://./prompt.yaml
 
 providers:
-  - id: "ollama_llama_3_2"
-    model: "ollama:llama3.2:3b-instruct-q8_0"
+  - id: "ollama:llama3.2:3b-instruct-q8_0"
     config:
       temperature: 0.0
       base_url: "http://localhost:11434/v1"
-  - id: "ollama_gemma3"
-    model: "ollama:gemma3"
+  - id: "ollama:gemma3"
     config:
       temperature: 0.0
       base_url: "http://localhost:11434/v1"
@@ -32,11 +30,11 @@ defaultTest:
     #   threshold: 0.7
 
 tests:
-  - file: "file://./calendar_events_dataset.jsonl"
+  - "file://./calendar_events_dataset.jsonl"
 
 assertionTemplates:
   containsValidJSONSchema:
-    type: contains-json  # Promptfoo evaluator type
+    type: contains_json  # Promptfoo evaluator type
     value:
       $ref: '#/calendarEventSummarySchema'
   assertExpected:

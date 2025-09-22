@@ -1,11 +1,17 @@
-"""Simple file-based cache for PromptDev evaluations."""
-
 import contextlib
 import hashlib
-import json
 import time
 from pathlib import Path
 from typing import Any
+
+from pydantic_core import to_json
+
+from promptdev.utils.file import read_json_file, write_json_file
+
+
+class CacheManager:
+    def __init__(self, enabled: bool = True, cache_dir: Path | None = None):
+        self.cache = SimpleCache(enabled, cache_dir)
 
 
 class SimpleCache:
@@ -59,12 +65,11 @@ class SimpleCache:
             "provider_config": provider_config or {},
         }
 
-        # Sort keys for consistent hashing
-        cache_json = json.dumps(cache_data, sort_keys=True, ensure_ascii=True)
+        # Sort keys for consistent hashing (pydantic_core sorts by default)
+        cache_json = to_json(cache_data).decode("utf-8")
 
         # Generate SHA256 hash for the key
         return hashlib.sha256(cache_json.encode()).hexdigest()
-
 
     def _load_cache(self) -> dict[str, Any]:
         """Load cache data from file.
@@ -76,8 +81,7 @@ class SimpleCache:
             return {}
 
         try:
-            with open(self.cache_file, encoding="utf-8") as f:
-                cache_data = json.load(f)
+            cache_data = read_json_file(self.cache_file)
 
             # Check for TTL expiration if enabled
             current_time = time.time()
@@ -99,9 +103,8 @@ class SimpleCache:
 
             return valid_cache
 
-        except (OSError, json.JSONDecodeError, KeyError) as e:
+        except (OSError, ValueError, KeyError):
             # If cache file is corrupted, start fresh
-            print(f"Warning: Cache file corrupted, starting fresh: {e}")
             return {}
 
     def _save_cache(self, cache_data: dict[str, Any]) -> None:
@@ -119,14 +122,13 @@ class SimpleCache:
 
             # Write cache data with atomic operation
             temp_file = self.cache_file.with_suffix(".tmp")
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(cache_data, f, indent=2, ensure_ascii=False)
+            write_json_file(temp_file, cache_data)
 
             # Atomic rename
             temp_file.replace(self.cache_file)
 
-        except OSError as e:
-            print(f"Warning: Could not save cache: {e}")
+        except OSError:
+            pass
 
     def get(self, cache_key: str) -> Any | None:
         """Get a value from the cache.
@@ -185,8 +187,8 @@ class SimpleCache:
         try:
             if self.cache_file.exists():
                 self.cache_file.unlink()
-        except OSError as e:
-            print(f"Warning: Could not clear cache: {e}")
+        except OSError:
+            pass
 
     def size(self) -> int:
         """Get the number of cached items."""
@@ -221,27 +223,3 @@ class SimpleCache:
             "cache_file_size_bytes": file_size,
             "keys": list(cache_data.keys())[:10],  # Show first 10 keys for debugging
         }
-
-
-# Global cache instance
-_cache_instance: SimpleCache | None = None
-
-
-def get_cache() -> SimpleCache:
-    """Get the global cache instance."""
-    global _cache_instance
-    if _cache_instance is None:
-        _cache_instance = SimpleCache()
-    return _cache_instance
-
-
-def set_cache_enabled(enabled: bool) -> None:
-    """Enable or disable the global cache."""
-    cache = get_cache()
-    cache.enabled = enabled
-
-
-def clear_cache() -> None:
-    """Clear the global cache."""
-    cache = get_cache()
-    cache.clear()

@@ -1,0 +1,5 @@
+- role: system
+  content: "Responds exactly the same as the input."
+
+- role: user
+  content: "Respond: {text}"

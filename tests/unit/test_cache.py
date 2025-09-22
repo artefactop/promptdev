@@ -1,12 +1,10 @@
-"""Tests for the caching system."""
-
 import tempfile
 import time
 from pathlib import Path
 
 import pytest
 
-from promptdev.cache.simple_cache import SimpleCache
+from promptdev.core.cache import SimpleCache
 
 
 class TestSimpleCache:
